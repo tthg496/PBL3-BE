@@ -1,0 +1,167 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+
+namespace ParkingManagement.Web.Controllers
+{
+    public class AuthController : Controller
+    {
+        private readonly IAuthService _auth;
+        private readonly IEmployeeInviteService _inviteService;
+        private readonly IEmailService _emailService;
+
+        public AuthController(IAuthService auth, IEmployeeInviteService inviteService, IEmailService emailService)
+        {
+            _auth = auth;
+            _inviteService = inviteService;
+            _emailService = emailService;
+        }
+
+        #region Login
+        [HttpGet]
+        public IActionResult Login() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginDto dto)
+        {
+            if (!ModelState.IsValid) return View(dto);
+
+            var result = await _auth.LoginAsync(dto);
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.Message);
+                return View(dto);
+            }
+
+            // Lưu thông tin vào Session
+            HttpContext.Session.SetString("AccountId", result.AccountId ?? "");
+            HttpContext.Session.SetString("Role", result.Role ?? "");
+            HttpContext.Session.SetString("FullName", result.FullName ?? "");
+            HttpContext.Session.SetString("RelatedId", result.RelatedId ?? "");
+
+            return result.Role switch
+            {
+                "Manager" => RedirectToAction("Index", "Report"),
+                "Employee" => RedirectToAction("CheckIn", "Ticket"),
+                _ => RedirectToAction("MyTickets", "Customer")
+            };
+        }
+        #endregion
+
+        #region Register & OTP
+        [HttpGet]
+        public IActionResult Register() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterDto dto)
+        {
+            if (!ModelState.IsValid) return View(dto);
+
+            var result = await _auth.RegisterAsync(dto);
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.Message);
+                return View(dto);
+            }
+
+            // Gửi OTP qua Email
+            await _emailService.SendOtpEmailAsync(dto.Email, dto.FullName, result.Otp);
+
+            // Lưu Email vào TempData để dùng cho bước Verify
+            TempData["RegisterEmail"] = dto.Email;
+            return RedirectToAction("VerifyOtp");
+        }
+
+        [HttpGet]
+        public IActionResult VerifyOtp()
+        {
+            var email = TempData["RegisterEmail"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Register");
+            }
+
+            // Giữ email lại trong TempData phòng trường hợp user reload trang
+            TempData.Keep("RegisterEmail");
+
+            var dto = new VerifyOtpDto { Email = email };
+            return View(dto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyOtp(VerifyOtpDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData.Keep("RegisterEmail");
+                return View(dto);
+            }
+
+            var result = await _auth.VerifyOtpAsync(dto);
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.Message);
+                // Giữ lại email trong TempData để user có thể thử lại
+                TempData.Keep("RegisterEmail");
+                return View(dto);
+            }
+
+            TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+            return RedirectToAction("Login");
+        }
+        #endregion
+
+        #region Employee Registration (Invite)
+        [HttpGet]
+        public async Task<IActionResult> RegisterEmployee(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                TempData["ErrorMessage"] = "Link mời không hợp lệ.";
+                return RedirectToAction("Login");
+            }
+
+            var inviteResult = await _inviteService.GetInviteByTokenAsync(token);
+            if (!inviteResult.Success || inviteResult.Data == null)
+            {
+                ViewBag.Error = inviteResult.Message;
+                return View("Error"); // Hoặc trang báo lỗi riêng của bạn
+            }
+
+            var dto = new EmployeeRegisterDto
+            {
+                InviteToken = token,
+                EmployeeCode = inviteResult.Data.EmployeeCode
+            };
+            return View(dto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterEmployee(EmployeeRegisterDto dto)
+        {
+            if (!ModelState.IsValid) return View(dto);
+
+            var result = await _auth.RegisterEmployeeAsync(dto);
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.Message);
+                return View(dto);
+            }
+
+            TempData["SuccessMessage"] = "Kích hoạt tài khoản nhân viên thành công!";
+            return RedirectToAction("Login");
+        }
+        #endregion
+
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
+        }
+    }
+}

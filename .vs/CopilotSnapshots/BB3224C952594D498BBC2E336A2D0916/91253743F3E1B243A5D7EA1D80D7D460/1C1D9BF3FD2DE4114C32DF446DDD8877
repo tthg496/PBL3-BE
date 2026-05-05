@@ -1,0 +1,10 @@
+﻿using ParkingManagement.BLL.DTOs;
+
+namespace ParkingManagement.BLL.Services.Interfaces
+{
+    public interface IEmployeeInviteService
+    {
+        Task<ServiceResult<EmployeeInviteDto>> CreateInviteAsync(CreateEmployeeInviteDto dto);
+        Task<ServiceResult<EmployeeInviteDto>> GetInviteByTokenAsync(string token);
+    }
+}

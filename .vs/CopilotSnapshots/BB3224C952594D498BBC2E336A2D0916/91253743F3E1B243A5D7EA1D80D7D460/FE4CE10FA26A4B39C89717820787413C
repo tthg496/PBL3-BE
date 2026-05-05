@@ -1,0 +1,114 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+
+namespace ParkingManagement.Web.Controllers.Api
+{
+    /// <summary>
+    /// API for Monthly Ticket Management
+    /// </summary>
+    [ApiController]
+    [Route("api/monthly-tickets")]
+    [Produces("application/json")]
+    public class MonthlyTicketsController : ControllerBase
+    {
+        private readonly IMonthlyTicketService _monthlyTicketService;
+
+        public MonthlyTicketsController(IMonthlyTicketService monthlyTicketService)
+        {
+            _monthlyTicketService = monthlyTicketService;
+        }
+
+        /// <summary>
+        /// Get all monthly tickets
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(List<MonthlyTicketDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _monthlyTicketService.GetAllAsync();
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get monthly tickets by customer
+        /// </summary>
+        [HttpGet("customer/{customerId}")]
+        [ProducesResponseType(typeof(List<MonthlyTicketDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByCustomerId(string customerId)
+        {
+            var result = await _monthlyTicketService.GetByCustomerIdAsync(customerId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get monthly ticket by ID
+        /// </summary>
+        [HttpGet("{monthlyTicketId}")]
+        [ProducesResponseType(typeof(MonthlyTicketDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById(string monthlyTicketId)
+        {
+            var result = await _monthlyTicketService.GetByIdAsync(monthlyTicketId);
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy vé tháng" });
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Create new monthly ticket
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(ServiceResult<MonthlyTicketDto>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ServiceResult<MonthlyTicketDto>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Create([FromBody] CreateMonthlyTicketDto dto)
+        {
+            var result = await _monthlyTicketService.CreateAsync(dto);
+            if (!result.Success)
+                return BadRequest(result);
+            return CreatedAtAction(nameof(GetById), new { monthlyTicketId = result.Data?.MonthlyTicketId }, result);
+        }
+
+        /// <summary>
+        /// Update monthly ticket
+        /// </summary>
+        [HttpPut("{monthlyTicketId}")]
+        [ProducesResponseType(typeof(ServiceResult<MonthlyTicketDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ServiceResult<MonthlyTicketDto>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Update(string monthlyTicketId, [FromBody] UpdateMonthlyTicketDto dto)
+        {
+            var result = await _monthlyTicketService.UpdateAsync(monthlyTicketId, dto);
+            if (!result.Success)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Cancel/Deactivate monthly ticket
+        /// </summary>
+        [HttpDelete("{monthlyTicketId}")]
+        [ProducesResponseType(typeof(ServiceResult<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ServiceResult<string>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Cancel(string monthlyTicketId)
+        {
+            var result = await _monthlyTicketService.CancelAsync(monthlyTicketId);
+            if (!result.Success)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Renew monthly ticket
+        /// </summary>
+        [HttpPost("{monthlyTicketId}/renew")]
+        [ProducesResponseType(typeof(ServiceResult<MonthlyTicketDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ServiceResult<MonthlyTicketDto>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Renew(string monthlyTicketId, [FromBody] RenewMonthlyTicketDto dto)
+        {
+            var result = await _monthlyTicketService.RenewAsync(monthlyTicketId, dto);
+            if (!result.Success)
+                return BadRequest(result);
+            return Ok(result);
+        }
+    }
+}

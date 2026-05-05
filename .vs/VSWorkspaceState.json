@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Data",
+    "\\Exceptions",
+    "\\Models",
+    "\\Models\\DTOs",
+    "\\Models\\Entities",
+    "\\Models\\Entities\\LegacyParking",
+    "\\Models\\Requests",
+    "\\Models\\Responses",
+    "\\Properties"
+  ],
+  "SelectedNode": "\\Models\\Responses",
+  "PreviewInSolutionExplorer": false
+}

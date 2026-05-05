@@ -1,0 +1,294 @@
+﻿using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+using ParkingManagement.DAL.Interfaces;
+
+namespace ParkingManagement.BLL.Services.Implementations
+{
+    /// <summary>
+    /// Manager Parking Slot Management Service
+    /// </summary>
+    public class ParkingSlotManagementService : IParkingSlotManagementService
+    {
+        private readonly IParkingSlotRepository _parkingSlotRepository;
+        private readonly ITicketRepository _ticketRepository;
+
+        public ParkingSlotManagementService(
+            IParkingSlotRepository parkingSlotRepository,
+            ITicketRepository ticketRepository)
+        {
+            _parkingSlotRepository = parkingSlotRepository;
+            _ticketRepository = ticketRepository;
+        }
+
+        /// <summary>
+        /// Get list of parking slots
+        /// </summary>
+        public async Task<ListParkingSlotDto> GetParkingSlotsAsync(ParkingSlotFilterDto filter)
+        {
+            try
+            {
+                var allSlots = (await _parkingSlotRepository.GetAllAsync()).ToList();
+                var tickets = (await _ticketRepository.GetAllAsync()).ToList();
+
+                // Apply filters
+                var filtered = allSlots.AsEnumerable();
+
+                if (!string.IsNullOrEmpty(filter.Status))
+                    filtered = filtered.Where(s => s.Status == filter.Status);
+
+                if (!string.IsNullOrEmpty(filter.VehicleType))
+                    filtered = filtered.Where(s => s.VehicleType == filter.VehicleType);
+
+                if (!string.IsNullOrEmpty(filter.Location))
+                    filtered = filtered.Where(s => s.Location == filter.Location);
+
+                if (!string.IsNullOrEmpty(filter.SearchKeyword))
+                {
+                    var keyword = filter.SearchKeyword.ToLower();
+                    filtered = filtered.Where(s => s.SlotId.ToLower().Contains(keyword));
+                }
+
+                var sorted = filtered.OrderBy(s => s.SlotId).ToList();
+
+                // Pagination
+                var totalItems = sorted.Count;
+                var totalPages = (int)Math.Ceiling(totalItems / (double)filter.PageSize);
+                var items = sorted
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToList();
+
+                // Map to DTOs
+                var slotDtos = items.Select(s =>
+                {
+                    var currentTicket = tickets.FirstOrDefault(t => t.SlotId == s.SlotId && string.IsNullOrEmpty(t.CheckOutTime.ToString()));
+                    var usageCount = tickets.Count(t => t.SlotId == s.SlotId);
+                    var lastUsed = tickets.Where(t => t.SlotId == s.SlotId).Max(t => (DateTime?)t.CheckOutTime ?? t.CheckInTime);
+
+                    return new ParkingSlotListDto
+                    {
+                        SlotId = s.SlotId,
+                        VehicleType = s.VehicleType,
+                        Location = s.Location,
+                        Status = s.Status,
+                        CurrentOccupant = currentTicket?.VehiclePlate,
+                        OccupiedSince = currentTicket?.CheckInTime,
+                        UsageCount = usageCount,
+                        LastUsedAt = lastUsed
+                    };
+                }).ToList();
+
+                var totalEmpty = sorted.Count(s => s.Status == "Trống");
+                var totalOccupied = sorted.Count(s => s.Status == "Đang sử dụng");
+                var totalMaintenance = sorted.Count(s => s.Status == "Bảo trì");
+
+                return new ListParkingSlotDto
+                {
+                    Items = slotDtos,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    TotalEmpty = totalEmpty,
+                    TotalOccupied = totalOccupied,
+                    TotalMaintenance = totalMaintenance
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ListParkingSlotDto();
+            }
+        }
+
+        /// <summary>
+        /// Get parking slot detail + statistics
+        /// </summary>
+        public async Task<ParkingSlotDetailDto> GetParkingSlotDetailAsync(string slotId)
+        {
+            try
+            {
+                var slot = await _parkingSlotRepository.GetByIdAsync(slotId);
+                if (slot == null)
+                    throw new Exception("Chỗ đỗ không tồn tại");
+
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var slotTickets = allTickets.Where(t => t.SlotId == slotId).ToList();
+
+                var today = DateTime.Now.Date;
+                var monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+
+                var usageThisMonth = slotTickets.Count(t => t.CheckInTime >= monthStart);
+                var usageThisWeek = slotTickets.Count(t => t.CheckInTime >= DateTime.Now.AddDays(-7));
+                var avgOccupancyTime = slotTickets.Count > 0
+                    ? slotTickets.Where(t => t.CheckOutTime.HasValue)
+                        .Average(t => (t.CheckOutTime.Value - t.CheckInTime).TotalMinutes)
+                    : 0;
+
+                var currentTicket = slotTickets.FirstOrDefault(t => string.IsNullOrEmpty(t.CheckOutTime.ToString()));
+                var occupancyMinutes = currentTicket != null
+                    ? (int)(DateTime.Now - currentTicket.CheckInTime).TotalMinutes
+                    : (int?)null;
+
+                // Recent history (last 10)
+                var history = slotTickets
+                    .OrderByDescending(t => t.CheckInTime)
+                    .Take(10)
+                    .Select(t => new SlotUsageHistoryDto
+                    {
+                        VehiclePlate = t.VehiclePlate,
+                        CustomerName = t.Customer?.FullName,
+                        CheckInTime = t.CheckInTime,
+                        CheckOutTime = t.CheckOutTime,
+                        DurationMinutes = t.CheckOutTime.HasValue
+                            ? (int)(t.CheckOutTime.Value - t.CheckInTime).TotalMinutes
+                            : null
+                    })
+                    .ToList();
+
+                return new ParkingSlotDetailDto
+                {
+                    SlotId = slot.SlotId,
+                    VehicleType = slot.VehicleType,
+                    Location = slot.Location,
+                    Status = slot.Status,
+                    IsOccupied = currentTicket != null,
+                    CurrentVehiclePlate = currentTicket?.VehiclePlate,
+                    CurrentCustomerName = currentTicket?.Customer?.FullName,
+                    OccupiedSince = currentTicket?.CheckInTime,
+                    CurrentOccupancyMinutes = occupancyMinutes,
+                    TotalUsageCount = slotTickets.Count,
+                    UsageThisMonth = usageThisMonth,
+                    UsageThisWeek = usageThisWeek,
+                    AverageOccupancyTime = avgOccupancyTime,
+                    FirstUsedAt = slotTickets.Count > 0 ? slotTickets.Min(t => t.CheckInTime) : null,
+                    LastUsedAt = slotTickets.Count > 0 
+                        ? slotTickets.Max(t => t.CheckOutTime ?? t.CheckInTime)
+                        : null,
+                    RecentHistory = history
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi lấy chi tiết chỗ đỗ: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Get parking slot report
+        /// </summary>
+        public async Task<ParkingSlotReportDto> GetParkingSlotReportAsync()
+        {
+            try
+            {
+                var slots = (await _parkingSlotRepository.GetAllAsync()).ToList();
+                var tickets = (await _ticketRepository.GetAllAsync()).ToList();
+
+                var totalSlots = slots.Count;
+                var totalEmpty = slots.Count(s => s.Status == "Trống");
+                var totalOccupied = slots.Count(s => s.Status == "Đang sử dụng");
+                var totalMaintenance = slots.Count(s => s.Status == "Bảo trì");
+                var utilization = totalSlots > 0 ? (double)totalOccupied / totalSlots * 100 : 0;
+
+                // By vehicle type
+                var byVehicleType = slots
+                    .GroupBy(s => s.VehicleType)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => new SlotTypeDetailDto
+                        {
+                            Total = g.Count(),
+                            Empty = g.Count(s => s.Status == "Trống"),
+                            Occupied = g.Count(s => s.Status == "Đang sử dụng"),
+                            Maintenance = g.Count(s => s.Status == "Bảo trì"),
+                            UtilizationRate = g.Count() > 0
+                                ? (double)g.Count(s => s.Status == "Đang sử dụng") / g.Count() * 100
+                                : 0
+                        }
+                    );
+
+                // Top used
+                var topUsed = slots
+                    .Select(s => new TopUsedSlotDto
+                    {
+                        SlotId = s.SlotId,
+                        Location = s.Location,
+                        UsageCount = tickets.Count(t => t.SlotId == s.SlotId),
+                        LastUsedAt = tickets.Where(t => t.SlotId == s.SlotId)
+                            .Max(t => (DateTime?)(t.CheckOutTime ?? t.CheckInTime))
+                    })
+                    .OrderByDescending(x => x.UsageCount)
+                    .Take(5)
+                    .ToList();
+
+                // Least used
+                var leastUsed = slots
+                    .Select(s => new TopUsedSlotDto
+                    {
+                        SlotId = s.SlotId,
+                        Location = s.Location,
+                        UsageCount = tickets.Count(t => t.SlotId == s.SlotId),
+                        LastUsedAt = tickets.Where(t => t.SlotId == s.SlotId)
+                            .Max(t => (DateTime?)(t.CheckOutTime ?? t.CheckInTime))
+                    })
+                    .OrderBy(x => x.UsageCount)
+                    .Take(5)
+                    .ToList();
+
+                return new ParkingSlotReportDto
+                {
+                    TotalSlots = totalSlots,
+                    TotalEmpty = totalEmpty,
+                    TotalOccupied = totalOccupied,
+                    TotalMaintenance = totalMaintenance,
+                    UtilizationRate = utilization,
+                    ByVehicleType = byVehicleType,
+                    TopUsedSlots = topUsed,
+                    LeastUsedSlots = leastUsed
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ParkingSlotReportDto();
+            }
+        }
+
+        /// <summary>
+        /// Update parking slot status
+        /// </summary>
+        public async Task<UpdateParkingSlotResultDto> UpdateParkingSlotAsync(UpdateParkingSlotDto request)
+        {
+            try
+            {
+                var slot = await _parkingSlotRepository.GetByIdAsync(request.SlotId);
+                if (slot == null)
+                    return new UpdateParkingSlotResultDto
+                    {
+                        Success = false,
+                        Message = "Chỗ đỗ không tồn tại",
+                        SlotId = request.SlotId
+                    };
+
+                if (!string.IsNullOrEmpty(request.Status))
+                    slot.Status = request.Status;
+
+                await _parkingSlotRepository.UpdateAsync(slot);
+
+                return new UpdateParkingSlotResultDto
+                {
+                    Success = true,
+                    Message = "Cập nhật chỗ đỗ thành công",
+                    SlotId = request.SlotId
+                };
+            }
+            catch (Exception ex)
+            {
+                return new UpdateParkingSlotResultDto
+                {
+                    Success = false,
+                    Message = $"Lỗi cập nhật chỗ đỗ: {ex.Message}",
+                    SlotId = request.SlotId
+                };
+            }
+        }
+    }
+}

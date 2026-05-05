@@ -1,0 +1,686 @@
+﻿using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+using ParkingManagement.BLL.Validators;
+using ParkingManagement.DAL.Models;
+using ParkingManagement.DAL.Interfaces;
+
+namespace ParkingManagement.BLL.Services.Implementations
+{
+    /// <summary>
+    /// UC005.2 - Cáº¥p nháº­t tráº¡ng thÃ¡i chá»— Ä‘á»—
+    /// Xá»­ lÃ½ logic quáº£n lÃ½ tráº¡ng thÃ¡i chá»— Ä‘á»—
+    /// 
+    /// Quy trÃ¬nh:
+    /// 1. NhÃ¢n viÃªn xem danh sÃ¡ch/báº£n Ä‘á»“ chá»— Ä‘á»—
+    /// 2. Chá»n chá»— Ä‘á»ƒ cáº­p nháº­t tráº¡ng thÃ¡i
+    /// 3. Validate transition (kiá»ƒm tra cÃ³ thá»ƒ chuyá»ƒn khÃ´ng)
+    /// 4. Ghi láº¡i log + thÃªm ghi chÃº (náº¿u cáº§n)
+    /// 5. Cáº­p nháº­t DB + thÃ´ng bÃ¡o
+    /// 
+    /// Error handling (8a):
+    /// - Tráº¡ng thÃ¡i khÃ´ng há»£p lá»‡
+    /// - Transition khÃ´ng Ä‘Æ°á»£c phÃ©p
+    /// - Váº«n cÃ²n xe Ä‘ang Ä‘á»— (khÃ´ng cho phÃ©p chuyá»ƒn sang báº£o trÃ¬/há»ng)
+    /// - Thiáº¿u ghi chÃº (báº£o trÃ¬/há»ng cáº§n ghi chÃº)
+    /// </summary>
+    public class ParkingSlotService : IParkingSlotService
+    {
+        private readonly IParkingSlotRepository _slotRepo;
+        private readonly IParkingSlotAuditLogRepository _auditRepo;
+        private readonly ITicketRepository _ticketRepo;
+        private readonly IParkingSlotValidator _validator;
+
+        public ParkingSlotService(
+            IParkingSlotRepository slotRepo,
+            IParkingSlotAuditLogRepository auditRepo,
+            ITicketRepository ticketRepo,
+            IParkingSlotValidator validator)
+        {
+            _slotRepo = slotRepo;
+            _auditRepo = auditRepo;
+            _ticketRepo = ticketRepo;
+            _validator = validator;
+        }
+
+        /// <summary>
+        /// Láº¥y danh sÃ¡ch táº¥t cáº£ chá»— Ä‘á»—
+        /// </summary>
+        public async Task<List<ParkingSlotDto>> GetAllAsync()
+        {
+            try
+            {
+                var slots = await _slotRepo.GetAllAsync();
+                return slots.Select(MapToDto).ToList();
+            }
+            catch
+            {
+                return new List<ParkingSlotDto>();
+            }
+        }
+
+        /// <summary>
+        /// Láº¥y danh sÃ¡ch chá»— Ä‘á»— trá»‘ng theo loáº¡i xe
+        /// </summary>
+        public async Task<List<ParkingSlotDto>> GetAvailableAsync(string vehicleType)
+        {
+            try
+            {
+                var slots = await _slotRepo.GetAvailableAsync(vehicleType);
+                return slots.Select(MapToDto).ToList();
+            }
+            catch
+            {
+                return new List<ParkingSlotDto>();
+            }
+        }
+
+        /// <summary>
+        /// Láº¥y thÃ´ng tin chi tiáº¿t má»™t chá»— Ä‘á»—
+        /// </summary>
+        public async Task<ParkingSlotDto?> GetByIdAsync(string slotId)
+        {
+            try
+            {
+                var slot = await _slotRepo.GetByIdAsync(slotId);
+                return slot == null ? null : MapToDto(slot);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Cáº­p nháº­t tráº¡ng thÃ¡i chá»— Ä‘á»— vá»›i validation & logging
+        /// UC005.2 - Main flow
+        /// </summary>
+        public async Task<ServiceResult<string>> UpdateStatusAsync(UpdateSlotStatusDto dto, string employeeId)
+        {
+            try
+            {
+                // Validate input
+                var inputValidation = _validator.ValidateUpdateSlotStatus(dto);
+                if (!inputValidation.IsValid)
+                    return ServiceResult<string>.Fail(inputValidation.ErrorMessage!);
+
+                // Láº¥y chá»— Ä‘á»— hiá»‡n táº¡i
+                var slot = await _slotRepo.GetByIdAsync(dto.SlotId);
+                if (slot == null)
+                    return ServiceResult<string>.Fail($"KhÃ´ng tÃ¬m tháº¥y chá»— Ä‘á»— {dto.SlotId}");
+
+                // Validate transition
+                var transitionValidation = _validator.ValidateStatusTransition(slot.Status, dto.NewStatus);
+                if (!transitionValidation.IsValid)
+                    return ServiceResult<string>.Fail(transitionValidation.ErrorMessage!);
+
+                // Kiá»ƒm tra náº¿u váº«n cÃ²n xe Ä‘ang Ä‘á»— (status = "Äang sá»­ dá»¥ng")
+                if (slot.Status == "Äang sá»­ dá»¥ng" && (dto.NewStatus == "Báº£o trÃ¬" || dto.NewStatus == "Há»ng"))
+                {
+                    // Kiá»ƒm tra cÃ³ ticket active khÃ´ng
+                    var activeTicket = await _ticketRepo.GetActiveByPlateAsync(dto.SlotId);
+                    if (activeTicket != null)
+                        return ServiceResult<string>.Fail(
+                            "KhÃ´ng thá»ƒ cáº­p nháº­t tráº¡ng thÃ¡i nÃ y vÃ¬ váº«n cÃ²n xe Ä‘ang Ä‘á»—. Vui lÃ²ng kiá»ƒm tra láº¡i checkout hoáº·c xe.");
+                }
+
+                // Validate ghi chÃº (náº¿u cáº§n)
+                var noteValidation = _validator.ValidateNote(dto.Note, dto.NewStatus);
+                if (!noteValidation.IsValid)
+                    return ServiceResult<string>.Fail(noteValidation.ErrorMessage!);
+
+                // Cáº­p nháº­t slot status
+                slot.Status = dto.NewStatus;
+                slot.LastUpdated = DateTime.Now;
+                await _slotRepo.UpdateAsync(slot);
+
+                // Ghi log láº¡i thay Ä‘á»•i
+                var logId = await _auditRepo.GenerateIdAsync();
+                var auditLog = new ParkingSlotAuditLog
+                {
+                    LogId = logId,
+                    SlotId = dto.SlotId,
+                    EmployeeId = employeeId,
+                    OldStatus = slot.Status,  // Note: giÃ¡ trá»‹ cÅ© Ä‘Ã£ Ä‘Æ°á»£c set lÃºc validate
+                    NewStatus = dto.NewStatus,
+                    Note = dto.Note,
+                    ChangedAt = DateTime.Now,
+                    Reason = $"Cáº­p nháº­t báº±ng tay bá»Ÿi nhÃ¢n viÃªn {employeeId}"
+                };
+                await _auditRepo.AddAsync(auditLog);
+
+                // Return success message
+                return ServiceResult<string>.Ok(
+                    logId,
+                    $"Cáº­p nháº­t tráº¡ng thÃ¡i chá»— {dto.SlotId} thÃ nh '{dto.NewStatus}' thÃ nh cÃ´ng.");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<string>.Fail($"Lá»—i cáº­p nháº­t tráº¡ng thÃ¡i: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Láº¥y thá»‘ng kÃª sá»‘ lÆ°á»£ng chá»— Ä‘á»— theo tráº¡ng thÃ¡i
+        /// </summary>
+        public async Task<Dictionary<string, int>> GetSlotSummaryAsync()
+        {
+            try
+            {
+                var all = await _slotRepo.GetAllAsync();
+                return new Dictionary<string, int>
+                {
+                    ["Trá»‘ng"] = all.Count(s => s.Status == "Trá»‘ng"),
+                    ["Äang sá»­ dá»¥ng"] = all.Count(s => s.Status == "Äang sá»­ dá»¥ng"),
+                    ["ÄÃ£ Ä‘áº·t"] = all.Count(s => s.Status == "ÄÃ£ Ä‘áº·t"),
+                    ["Báº£o trÃ¬"] = all.Count(s => s.Status == "Báº£o trÃ¬"),
+                    ["Há»ng"] = all.Count(s => s.Status == "Há»ng"),
+                    ["Tá»•ng"] = all.Count
+                };
+            }
+            catch
+            {
+                return new Dictionary<string, int>();
+            }
+        }
+
+        /// <summary>
+        /// Láº¥y lá»‹ch sá»­ thay Ä‘á»•i tráº¡ng thÃ¡i cá»§a má»™t chá»— Ä‘á»—
+        /// </summary>
+        public async Task<List<dynamic>> GetAuditLogsAsync(string slotId)
+        {
+            try
+            {
+                var logs = await _auditRepo.GetBySlotIdAsync(slotId);
+                return logs.Select(log => new
+                {
+                    log.LogId,
+                    log.SlotId,
+                    EmployeeId = log.EmployeeId,
+                    EmployeeName = log.Employee?.FullName ?? "Unknown",
+                    log.OldStatus,
+                    log.NewStatus,
+                    log.Note,
+                    log.ChangedAt,
+                    log.Reason
+                }).Cast<dynamic>().ToList();
+            }
+            catch
+            {
+                return new List<dynamic>();
+            }
+        }
+
+        /// <summary>
+        /// Láº¥y lá»‹ch sá»­ thay Ä‘á»•i cá»§a má»™t nhÃ¢n viÃªn (30 ngÃ y gáº§n nháº¥t)
+        /// </summary>
+        public async Task<List<dynamic>> GetEmployeeAuditLogsAsync(string employeeId, int days = 30)
+        {
+            try
+            {
+                var fromDate = DateTime.Now.AddDays(-days);
+                var logs = await _auditRepo.GetByEmployeeIdAsync(employeeId);
+                
+                return logs
+                    .Where(log => log.ChangedAt >= fromDate)
+                    .Select(log => new
+                    {
+                        log.LogId,
+                        log.SlotId,
+                        log.OldStatus,
+                        log.NewStatus,
+                        log.Note,
+                        log.ChangedAt
+                    })
+                    .Cast<dynamic>()
+                    .ToList();
+            }
+            catch
+            {
+                return new List<dynamic>();
+            }
+        }
+
+        /// <summary>
+        /// Validate trÆ°á»›c khi cáº­p nháº­t (cho form validation)
+        /// </summary>
+        public async Task<bool> CanUpdateStatusAsync(string slotId, string newStatus)
+        {
+            try
+            {
+                var slot = await _slotRepo.GetByIdAsync(slotId);
+                if (slot == null)
+                    return false;
+
+                var validation = _validator.ValidateStatusTransition(slot.Status, newStatus);
+                return validation.IsValid;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // â”€â”€â”€â”€ Helper Methods â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+        private ParkingSlotDto MapToDto(ParkingSlot slot)
+        {
+            return new ParkingSlotDto
+            {
+                SlotId = slot.SlotId,
+                Location = slot.Location,
+                VehicleType = slot.VehicleType,
+                Status = slot.Status,
+                LastUpdated = slot.LastUpdated
+            };
+        }
+        // ── Manager Slot Management ──
+        public async Task<ListParkingSlotDto> GetParkingSlotsAsync(ParkingSlotFilterDto filter)
+        {
+            try
+            {
+                var allSlots = (await _slotRepo.GetAllAsync()).ToList();
+                var tickets = (await _ticketRepository.GetAllAsync()).ToList();
+
+                // Apply filters
+                var filtered = allSlots.AsEnumerable();
+
+                if (!string.IsNullOrEmpty(filter.Status))
+                    filtered = filtered.Where(s => s.Status == filter.Status);
+
+                if (!string.IsNullOrEmpty(filter.VehicleType))
+                    filtered = filtered.Where(s => s.VehicleType == filter.VehicleType);
+
+                if (!string.IsNullOrEmpty(filter.Location))
+                    filtered = filtered.Where(s => s.Location == filter.Location);
+
+                if (!string.IsNullOrEmpty(filter.SearchKeyword))
+                {
+                    var keyword = filter.SearchKeyword.ToLower();
+                    filtered = filtered.Where(s => s.SlotId.ToLower().Contains(keyword));
+                }
+
+                var sorted = filtered.OrderBy(s => s.SlotId).ToList();
+
+                // Pagination
+                var totalItems = sorted.Count;
+                var totalPages = (int)Math.Ceiling(totalItems / (double)filter.PageSize);
+                var items = sorted
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToList();
+
+                // Map to DTOs
+                var slotDtos = items.Select(s =>
+                {
+                    var currentTicket = tickets.FirstOrDefault(t => t.SlotId == s.SlotId && string.IsNullOrEmpty(t.CheckOutTime.ToString()));
+                    var usageCount = tickets.Count(t => t.SlotId == s.SlotId);
+                    var lastUsed = tickets.Where(t => t.SlotId == s.SlotId).Max(t => (DateTime?)t.CheckOutTime ?? t.CheckInTime);
+
+                    return new ParkingSlotListDto
+                    {
+                        SlotId = s.SlotId,
+                        VehicleType = s.VehicleType,
+                        Location = s.Location,
+                        Status = s.Status,
+                        CurrentOccupant = currentTicket?.VehiclePlate,
+                        OccupiedSince = currentTicket?.CheckInTime,
+                        UsageCount = usageCount,
+                        LastUsedAt = lastUsed
+                    };
+                }).ToList();
+
+                var totalEmpty = sorted.Count(s => s.Status == "Trá»‘ng");
+                var totalOccupied = sorted.Count(s => s.Status == "Äang sá»­ dá»¥ng");
+                var totalMaintenance = sorted.Count(s => s.Status == "Báº£o trÃ¬");
+
+                return new ListParkingSlotDto
+                {
+                    Items = slotDtos,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    TotalEmpty = totalEmpty,
+                    TotalOccupied = totalOccupied,
+                    TotalMaintenance = totalMaintenance
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ListParkingSlotDto();
+            }
+        }
+
+        /// <summary>
+        /// Get parking slot detail + statistics
+        /// </summary>
+        public async Task<ParkingSlotDetailDto> GetParkingSlotDetailAsync(string slotId)
+        {
+            try
+            {
+                var slot = await _slotRepo.GetByIdAsync(slotId);
+                if (slot == null)
+                    throw new Exception("Chá»— Ä‘á»— khÃ´ng tá»“n táº¡i");
+
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var slotTickets = allTickets.Where(t => t.SlotId == slotId).ToList();
+
+                var today = DateTime.Now.Date;
+                var monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+
+                var usageThisMonth = slotTickets.Count(t => t.CheckInTime >= monthStart);
+                var usageThisWeek = slotTickets.Count(t => t.CheckInTime >= DateTime.Now.AddDays(-7));
+                var avgOccupancyTime = slotTickets.Count > 0
+                    ? slotTickets.Where(t => t.CheckOutTime.HasValue)
+                        .Average(t => (t.CheckOutTime.Value - t.CheckInTime).TotalMinutes)
+                    : 0;
+
+                var currentTicket = slotTickets.FirstOrDefault(t => string.IsNullOrEmpty(t.CheckOutTime.ToString()));
+                var occupancyMinutes = currentTicket != null
+                    ? (int)(DateTime.Now - currentTicket.CheckInTime).TotalMinutes
+                    : (int?)null;
+
+                // Recent history (last 10)
+                var history = slotTickets
+                    .OrderByDescending(t => t.CheckInTime)
+                    .Take(10)
+                    .Select(t => new SlotUsageHistoryDto
+                    {
+                        VehiclePlate = t.VehiclePlate,
+                        CustomerName = t.Customer?.FullName,
+                        CheckInTime = t.CheckInTime,
+                        CheckOutTime = t.CheckOutTime,
+                        DurationMinutes = t.CheckOutTime.HasValue
+                            ? (int)(t.CheckOutTime.Value - t.CheckInTime).TotalMinutes
+                            : null
+                    })
+                    .ToList();
+
+                return new ParkingSlotDetailDto
+                {
+                    SlotId = slot.SlotId,
+                    VehicleType = slot.VehicleType,
+                    Location = slot.Location,
+                    Status = slot.Status,
+                    IsOccupied = currentTicket != null,
+                    CurrentVehiclePlate = currentTicket?.VehiclePlate,
+                    CurrentCustomerName = currentTicket?.Customer?.FullName,
+                    OccupiedSince = currentTicket?.CheckInTime,
+                    CurrentOccupancyMinutes = occupancyMinutes,
+                    TotalUsageCount = slotTickets.Count,
+                    UsageThisMonth = usageThisMonth,
+                    UsageThisWeek = usageThisWeek,
+                    AverageOccupancyTime = avgOccupancyTime,
+                    FirstUsedAt = slotTickets.Count > 0 ? slotTickets.Min(t => t.CheckInTime) : null,
+                    LastUsedAt = slotTickets.Count > 0 
+                        ? slotTickets.Max(t => t.CheckOutTime ?? t.CheckInTime)
+                        : null,
+                    RecentHistory = history
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lá»—i láº¥y chi tiáº¿t chá»— Ä‘á»—: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Get parking slot report
+        /// </summary>
+        public async Task<ParkingSlotReportDto> GetParkingSlotReportAsync()
+        {
+            try
+            {
+                var slots = (await _slotRepo.GetAllAsync()).ToList();
+                var tickets = (await _ticketRepository.GetAllAsync()).ToList();
+
+                var totalSlots = slots.Count;
+                var totalEmpty = slots.Count(s => s.Status == "Trá»‘ng");
+                var totalOccupied = slots.Count(s => s.Status == "Äang sá»­ dá»¥ng");
+                var totalMaintenance = slots.Count(s => s.Status == "Báº£o trÃ¬");
+                var utilization = totalSlots > 0 ? (double)totalOccupied / totalSlots * 100 : 0;
+
+                // By vehicle type
+                var byVehicleType = slots
+                    .GroupBy(s => s.VehicleType)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => new SlotTypeDetailDto
+                        {
+                            Total = g.Count(),
+                            Empty = g.Count(s => s.Status == "Trá»‘ng"),
+                            Occupied = g.Count(s => s.Status == "Äang sá»­ dá»¥ng"),
+                            Maintenance = g.Count(s => s.Status == "Báº£o trÃ¬"),
+                            UtilizationRate = g.Count() > 0
+                                ? (double)g.Count(s => s.Status == "Äang sá»­ dá»¥ng") / g.Count() * 100
+                                : 0
+                        }
+                    );
+
+                // Top used
+                var topUsed = slots
+                    .Select(s => new TopUsedSlotDto
+                    {
+                        SlotId = s.SlotId,
+                        Location = s.Location,
+                        UsageCount = tickets.Count(t => t.SlotId == s.SlotId),
+                        LastUsedAt = tickets.Where(t => t.SlotId == s.SlotId)
+                            .Max(t => (DateTime?)(t.CheckOutTime ?? t.CheckInTime))
+                    })
+                    .OrderByDescending(x => x.UsageCount)
+                    .Take(5)
+                    .ToList();
+
+                // Least used
+                var leastUsed = slots
+                    .Select(s => new TopUsedSlotDto
+                    {
+                        SlotId = s.SlotId,
+                        Location = s.Location,
+                        UsageCount = tickets.Count(t => t.SlotId == s.SlotId),
+                        LastUsedAt = tickets.Where(t => t.SlotId == s.SlotId)
+                            .Max(t => (DateTime?)(t.CheckOutTime ?? t.CheckInTime))
+                    })
+                    .OrderBy(x => x.UsageCount)
+                    .Take(5)
+                    .ToList();
+
+                return new ParkingSlotReportDto
+                {
+                    TotalSlots = totalSlots,
+                    TotalEmpty = totalEmpty,
+                    TotalOccupied = totalOccupied,
+                    TotalMaintenance = totalMaintenance,
+                    UtilizationRate = utilization,
+                    ByVehicleType = byVehicleType,
+                    TopUsedSlots = topUsed,
+                    LeastUsedSlots = leastUsed
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ParkingSlotReportDto();
+            }
+        }
+
+        /// <summary>
+        /// Update parking slot status
+        /// </summary>
+        public async Task<UpdateParkingSlotResultDto> UpdateParkingSlotAsync(UpdateParkingSlotDto request)
+        {
+            try
+            {
+                var slot = await _slotRepo.GetByIdAsync(request.SlotId);
+                if (slot == null)
+                    return new UpdateParkingSlotResultDto
+                    {
+                        Success = false,
+                        Message = "Chá»— Ä‘á»— khÃ´ng tá»“n táº¡i",
+                        SlotId = request.SlotId
+                    };
+
+                if (!string.IsNullOrEmpty(request.Status))
+                    slot.Status = request.Status;
+
+                await _slotRepo.UpdateAsync(slot);
+
+                return new UpdateParkingSlotResultDto
+                {
+                    Success = true,
+                    Message = "Cáº­p nháº­t chá»— Ä‘á»— thÃ nh cÃ´ng",
+                    SlotId = request.SlotId
+                };
+            }
+            catch (Exception ex)
+            {
+                return new UpdateParkingSlotResultDto
+                {
+                    Success = false,
+                    Message = $"Lá»—i cáº­p nháº­t chá»— Ä‘á»—: {ex.Message}",
+                    SlotId = request.SlotId
+                };
+            }
+        }
+
+        // ── Employee Slot Management ──
+        public async Task<ListEmployeeSlotDto> GetEmployeeSlotsAsync(EmployeeSlotFilterDto filter)
+        {
+            try
+            {
+                var allSlots = (await _slotRepo.GetAllAsync()).ToList();
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+
+                // Apply filters
+                var filtered = allSlots.AsEnumerable();
+
+                if (!string.IsNullOrEmpty(filter.VehicleType))
+                    filtered = filtered.Where(s => s.VehicleType == filter.VehicleType);
+
+                if (!string.IsNullOrEmpty(filter.Status))
+                    filtered = filtered.Where(s => s.Status == filter.Status);
+
+                if (!string.IsNullOrEmpty(filter.Location))
+                    filtered = filtered.Where(s => s.Location == filter.Location);
+
+                var sorted = filtered.OrderBy(s => s.SlotId).ToList();
+
+                // Pagination
+                var totalItems = sorted.Count;
+                var totalPages = (int)Math.Ceiling(totalItems / (double)filter.PageSize);
+                var items = sorted
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToList();
+
+                // Map to DTOs
+                var slotDtos = items.Select(s =>
+                {
+                    var currentTicket = allTickets.FirstOrDefault(t => 
+                        t.SlotId == s.SlotId && string.IsNullOrEmpty(t.CheckOutTime.ToString()));
+
+                    return new EmployeeSlotListItemDto
+                    {
+                        SlotId = s.SlotId,
+                        VehicleType = s.VehicleType,
+                        Location = s.Location,
+                        Status = s.Status,
+                        IsAvailable = s.Status == "Trá»‘ng",
+                        CurrentOccupant = currentTicket?.VehiclePlate,
+                        OccupiedSince = currentTicket?.CheckInTime
+                    };
+                }).ToList();
+
+                var totalEmpty = sorted.Count(s => s.Status == "Trá»‘ng");
+                var totalOccupied = sorted.Count(s => s.Status == "Äang sá»­ dá»¥ng");
+                var totalMaintenance = sorted.Count(s => s.Status == "Báº£o trÃ¬");
+                var utilization = sorted.Count > 0
+                    ? (double)totalOccupied / sorted.Count * 100
+                    : 0;
+
+                return new ListEmployeeSlotDto
+                {
+                    Items = slotDtos,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    TotalEmpty = totalEmpty,
+                    TotalOccupied = totalOccupied,
+                    TotalMaintenance = totalMaintenance,
+                    UtilizationRate = utilization
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ListEmployeeSlotDto
+                {
+                    Items = new(),
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalItems = 0,
+                    TotalPages = 0,
+                    TotalEmpty = 0,
+                    TotalOccupied = 0,
+                    TotalMaintenance = 0,
+                    UtilizationRate = 0
+                };
+            }
+        }
+
+        /// <summary>
+        /// Láº¥y chi tiáº¿t chá»— Ä‘á»—
+        /// </summary>
+        public async Task<EmployeeSlotDetailDto> GetEmployeeSlotDetailAsync(string slotId)
+        {
+            try
+            {
+                var slot = await _slotRepo.GetByIdAsync(slotId);
+                if (slot == null)
+                    throw new Exception("Chá»— Ä‘á»— khÃ´ng tá»“n táº¡i");
+
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var slotTickets = allTickets.Where(t => t.SlotId == slotId).ToList();
+
+                var thisMonth = DateTime.Now.AddMonths(-1);
+                var thisWeek = DateTime.Now.AddDays(-7);
+
+                var usageThisMonth = slotTickets.Count(t => t.CheckInTime >= thisMonth);
+                var usageThisWeek = slotTickets.Count(t => t.CheckInTime >= thisWeek);
+                var lastUsed = slotTickets.Count > 0
+                    ? slotTickets.Max(t => t.CheckOutTime ?? t.CheckInTime)
+                    : (DateTime?)null;
+
+                var avgOccupancyTime = slotTickets.Count > 0
+                    ? slotTickets.Where(t => t.CheckOutTime.HasValue)
+                        .Average(t => (t.CheckOutTime.Value - t.CheckInTime).TotalMinutes)
+                    : 0;
+
+                var currentTicket = slotTickets.FirstOrDefault(t => string.IsNullOrEmpty(t.CheckOutTime.ToString()));
+                var occupancyMinutes = currentTicket != null
+                    ? (int)(DateTime.Now - currentTicket.CheckInTime).TotalMinutes
+                    : (int?)null;
+
+                return new EmployeeSlotDetailDto
+                {
+                    SlotId = slot.SlotId,
+                    VehicleType = slot.VehicleType,
+                    Location = slot.Location,
+                    Status = slot.Status,
+                    IsOccupied = currentTicket != null,
+                    CurrentVehiclePlate = currentTicket?.VehiclePlate,
+                    CurrentCustomerName = currentTicket?.Customer?.FullName,
+                    OccupiedSince = currentTicket?.CheckInTime,
+                    CurrentOccupancyMinutes = occupancyMinutes,
+                    UsageThisMonth = usageThisMonth,
+                    UsageThisWeek = usageThisWeek,
+                    LastUsedAt = lastUsed,
+                    AverageOccupancyTime = avgOccupancyTime
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lá»—i láº¥y chi tiáº¿t chá»— Ä‘á»—: {ex.Message}");
+            }
+        }
+    }
+}

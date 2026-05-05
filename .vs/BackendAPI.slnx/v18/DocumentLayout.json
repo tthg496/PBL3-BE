@@ -1,0 +1,434 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PC\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\1273338919\\AppDbContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\AppDbContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Data\\AppDbContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\ParkingDbContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Data\\ParkingDbContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Properties\\launchSettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Properties\\launchSettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\BackendAPI.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BackendAPI.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Configurations\\DependencyInjectionExtensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Configurations\\DependencyInjectionExtensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Services\\Interfaces\\IEmployeeService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Services\\Interfaces\\IEmployeeService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\QUICK_REFERENCE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:QUICK_REFERENCE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\COMPLETE_PROJECT_DOCUMENTATION_INDEX.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:COMPLETE_PROJECT_DOCUMENTATION_INDEX.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\FINAL_DELIVERY_SUMMARY.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:FINAL_DELIVERY_SUMMARY.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PC\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\1273338919\\ParkingDbContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\SeedData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Data\\SeedData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Repositories\\GenericRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Repositories\\GenericRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Repositories\\UnitOfWork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Repositories\\UnitOfWork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Migrations\\20260327191943_InitialCreate.Designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Migrations\\20260327191943_InitialCreate.Designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\SYSTEM_SPECIFICATION.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:SYSTEM_SPECIFICATION.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\IMPLEMENTATION_ROADMAP.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:IMPLEMENTATION_ROADMAP.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\GIAI_DOAN_4_READY_TO_START.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:GIAI_DOAN_4_READY_TO_START.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\LOCAL_VERIFICATION_REPORT.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:LOCAL_VERIFICATION_REPORT.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\MANUAL_VERIFICATION_CHECKLIST.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:MANUAL_VERIFICATION_CHECKLIST.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\MASTER_CHECKLIST.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:MASTER_CHECKLIST.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\DOCUMENTATION_INDEX.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:DOCUMENTATION_INDEX.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\README_VERIFICATION_COMPLETE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:README_VERIFICATION_COMPLETE.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 15,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "README_VERIFICATION_COMPLETE.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\README_VERIFICATION_COMPLETE.md",
+              "RelativeDocumentMoniker": "README_VERIFICATION_COMPLETE.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\README_VERIFICATION_COMPLETE.md",
+              "RelativeToolTip": "README_VERIFICATION_COMPLETE.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T05:45:52.58Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "DOCUMENTATION_INDEX.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\DOCUMENTATION_INDEX.md",
+              "RelativeDocumentMoniker": "DOCUMENTATION_INDEX.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\DOCUMENTATION_INDEX.md",
+              "RelativeToolTip": "DOCUMENTATION_INDEX.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T05:45:52.531Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "MASTER_CHECKLIST.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\MASTER_CHECKLIST.md",
+              "RelativeDocumentMoniker": "MASTER_CHECKLIST.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\MASTER_CHECKLIST.md",
+              "RelativeToolTip": "MASTER_CHECKLIST.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T05:45:52.482Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "MANUAL_VERIFICATION_CHECKLIST.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\MANUAL_VERIFICATION_CHECKLIST.md",
+              "RelativeDocumentMoniker": "MANUAL_VERIFICATION_CHECKLIST.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\MANUAL_VERIFICATION_CHECKLIST.md",
+              "RelativeToolTip": "MANUAL_VERIFICATION_CHECKLIST.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T05:45:52.429Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "LOCAL_VERIFICATION_REPORT.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\LOCAL_VERIFICATION_REPORT.md",
+              "RelativeDocumentMoniker": "LOCAL_VERIFICATION_REPORT.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\LOCAL_VERIFICATION_REPORT.md",
+              "RelativeToolTip": "LOCAL_VERIFICATION_REPORT.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T05:45:52.337Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "GIAI_DOAN_4_READY_TO_START.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\GIAI_DOAN_4_READY_TO_START.md",
+              "RelativeDocumentMoniker": "GIAI_DOAN_4_READY_TO_START.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\GIAI_DOAN_4_READY_TO_START.md",
+              "RelativeToolTip": "GIAI_DOAN_4_READY_TO_START.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T05:45:52.281Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "IMPLEMENTATION_ROADMAP.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\IMPLEMENTATION_ROADMAP.md",
+              "RelativeDocumentMoniker": "IMPLEMENTATION_ROADMAP.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\IMPLEMENTATION_ROADMAP.md",
+              "RelativeToolTip": "IMPLEMENTATION_ROADMAP.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T05:45:52.219Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "SYSTEM_SPECIFICATION.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\SYSTEM_SPECIFICATION.md",
+              "RelativeDocumentMoniker": "SYSTEM_SPECIFICATION.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\SYSTEM_SPECIFICATION.md",
+              "RelativeToolTip": "SYSTEM_SPECIFICATION.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T05:45:51.77Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "20260327191943_InitialCreate.Designer.cs",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Migrations\\20260327191943_InitialCreate.Designer.cs",
+              "RelativeDocumentMoniker": "Migrations\\20260327191943_InitialCreate.Designer.cs",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Migrations\\20260327191943_InitialCreate.Designer.cs",
+              "RelativeToolTip": "Migrations\\20260327191943_InitialCreate.Designer.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T04:17:10.747Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "UnitOfWork.cs",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Repositories\\UnitOfWork.cs",
+              "RelativeDocumentMoniker": "Repositories\\UnitOfWork.cs",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Repositories\\UnitOfWork.cs",
+              "RelativeToolTip": "Repositories\\UnitOfWork.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T04:16:38.172Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "GenericRepository.cs",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Repositories\\GenericRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\GenericRepository.cs",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Repositories\\GenericRepository.cs",
+              "RelativeToolTip": "Repositories\\GenericRepository.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T04:16:23.273Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "SeedData.cs",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\SeedData.cs",
+              "RelativeDocumentMoniker": "Data\\SeedData.cs",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\SeedData.cs",
+              "RelativeToolTip": "Data\\SeedData.cs",
+              "ViewState": "AgIAAG0AAAAAAAAAAIBJwG8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T04:11:00.7Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ParkingDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\1273338919\\ParkingDbContext.cs",
+              "ToolTip": "C:\\Users\\PC\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\1273338919\\ParkingDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T04:08:30.812Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\1273338919\\AppDbContext.cs",
+              "ToolTip": "C:\\Users\\PC\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\1273338919\\AppDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T04:04:01.716Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "FINAL_DELIVERY_SUMMARY.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\FINAL_DELIVERY_SUMMARY.md",
+              "RelativeDocumentMoniker": "FINAL_DELIVERY_SUMMARY.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\FINAL_DELIVERY_SUMMARY.md",
+              "RelativeToolTip": "FINAL_DELIVERY_SUMMARY.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEICAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T03:53:09.05Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "Data\\AppDbContext.cs",
+              "ViewState": "AgIAAE8AAAAAAAAAAAAiwG8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T03:52:52.792Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ParkingDbContext.cs",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\ParkingDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\ParkingDbContext.cs",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\ParkingDbContext.cs",
+              "RelativeToolTip": "Data\\ParkingDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-05T03:52:49.387Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "COMPLETE_PROJECT_DOCUMENTATION_INDEX.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\COMPLETE_PROJECT_DOCUMENTATION_INDEX.md",
+              "RelativeDocumentMoniker": "COMPLETE_PROJECT_DOCUMENTATION_INDEX.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\COMPLETE_PROJECT_DOCUMENTATION_INDEX.md",
+              "RelativeToolTip": "COMPLETE_PROJECT_DOCUMENTATION_INDEX.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAOwBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-05T03:52:36.115Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "QUICK_REFERENCE.md",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\QUICK_REFERENCE.md",
+              "RelativeDocumentMoniker": "QUICK_REFERENCE.md",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\QUICK_REFERENCE.md",
+              "RelativeToolTip": "QUICK_REFERENCE.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-05-04T17:55:42.553Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "IEmployeeService.cs",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Services\\Interfaces\\IEmployeeService.cs",
+              "RelativeDocumentMoniker": "Services\\Interfaces\\IEmployeeService.cs",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Services\\Interfaces\\IEmployeeService.cs",
+              "RelativeToolTip": "Services\\Interfaces\\IEmployeeService.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-04T17:15:28.599Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "Properties\\launchSettings.json",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Properties\\launchSettings.json",
+              "RelativeToolTip": "Properties\\launchSettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-04-25T13:30:19.066Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-04-25T13:29:55.554Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "BackendAPI.csproj",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\BackendAPI.csproj",
+              "RelativeDocumentMoniker": "BackendAPI.csproj",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\BackendAPI.csproj",
+              "RelativeToolTip": "BackendAPI.csproj",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-04-25T13:29:47.354Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "DependencyInjectionExtensions.cs",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Configurations\\DependencyInjectionExtensions.cs",
+              "RelativeDocumentMoniker": "Configurations\\DependencyInjectionExtensions.cs",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Configurations\\DependencyInjectionExtensions.cs",
+              "RelativeToolTip": "Configurations\\DependencyInjectionExtensions.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-25T13:29:34.008Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

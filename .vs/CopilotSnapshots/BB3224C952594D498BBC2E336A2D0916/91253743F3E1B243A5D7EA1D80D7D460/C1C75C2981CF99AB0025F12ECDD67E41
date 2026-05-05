@@ -1,0 +1,40 @@
+﻿using ParkingManagement.BLL.DTOs;
+
+namespace ParkingManagement.BLL.Services.Interfaces
+{
+    /// <summary>
+    /// Manager Employee Management
+    /// </summary>
+    public interface IManagerEmployeeService
+    {
+        // ── UC-MGR-EMP01: Xem danh sách nhân viên ────────────────
+        /// <summary>
+        /// Lấy danh sách nhân viên (filter, search, pagination)
+        /// </summary>
+        Task<ListManagerEmployeeDto> GetEmployeesAsync(ManagerEmployeeFilterDto filter);
+
+        // ── UC-MGR-EMP02: Xem chi tiết + thống kê ────────────────
+        /// <summary>
+        /// Lấy chi tiết nhân viên + thống kê công việc
+        /// </summary>
+        Task<ManagerEmployeeDetailDto> GetEmployeeDetailAsync(string employeeId);
+
+        // ── UC-MGR-EMP03: Thêm nhân viên (invite) ────────────────
+        /// <summary>
+        /// Tạo invite nhân viên (gửi link qua email)
+        /// </summary>
+        Task<CreateEmployeeInviteResultDto> CreateEmployeeInviteAsync(CreateEmployeeInviteByManagerDto request);
+
+        // ── UC-MGR-EMP04: Cập nhật nhân viên ─────────────────────
+        /// <summary>
+        /// Cập nhật thông tin nhân viên
+        /// </summary>
+        Task<UpdateEmployeeResultDto> UpdateEmployeeAsync(string employeeId, UpdateEmployeeByManagerDto request);
+
+        // ── UC-MGR-EMP05: Xóa nhân viên (soft delete) ────────────
+        /// <summary>
+        /// Xóa (vô hiệu hóa) nhân viên
+        /// </summary>
+        Task<DeleteEmployeeResultDto> DeleteEmployeeAsync(DeleteEmployeeDto request);
+    }
+}

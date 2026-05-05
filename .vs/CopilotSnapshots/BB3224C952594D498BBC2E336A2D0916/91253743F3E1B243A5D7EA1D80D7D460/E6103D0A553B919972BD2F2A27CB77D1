@@ -1,0 +1,233 @@
+﻿using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+using ParkingManagement.DAL.Interfaces;
+
+namespace ParkingManagement.BLL.Services.Implementations
+{
+    /// <summary>
+    /// Manager Report & Dashboard Service
+    /// </summary>
+    public class ManagerReportService : IManagerReportService
+    {
+        private readonly ITicketRepository _ticketRepository;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IEmployeeRepository _employeeRepository;
+        private readonly IParkingSlotRepository _parkingSlotRepository;
+        private readonly IMonthlyTicketRepository _monthlyTicketRepository;
+
+        public ManagerReportService(
+            ITicketRepository ticketRepository,
+            IPaymentRepository paymentRepository,
+            ICustomerRepository customerRepository,
+            IEmployeeRepository employeeRepository,
+            IParkingSlotRepository parkingSlotRepository,
+            IMonthlyTicketRepository monthlyTicketRepository)
+        {
+            _ticketRepository = ticketRepository;
+            _paymentRepository = paymentRepository;
+            _customerRepository = customerRepository;
+            _employeeRepository = employeeRepository;
+            _parkingSlotRepository = parkingSlotRepository;
+            _monthlyTicketRepository = monthlyTicketRepository;
+        }
+
+        /// <summary>
+        /// Dashboard Summary - 5 KPI chính
+        /// </summary>
+        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
+        {
+            try
+            {
+                var today = DateTime.Now.Date;
+                var monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                var yearStart = new DateTime(DateTime.Now.Year, 1, 1);
+
+                // Get all data
+                var tickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var payments = (await _paymentRepository.GetAllAsync()).ToList();
+                var customers = (await _customerRepository.GetAllAsync()).ToList();
+                var employees = (await _employeeRepository.GetAllAsync()).Where(e => !e.IsDeleted).ToList();
+                var slots = (await _parkingSlotRepository.GetAllAsync()).ToList();
+                var monthlyTickets = (await _monthlyTicketRepository.GetAllAsync()).ToList();
+
+                // Revenue KPIs
+                var todayRevenue = payments
+                    .Where(p => p.PaymentTime.Date == today && p.Status == "Thành công")
+                    .Sum(p => p.Amount);
+
+                var thisMonthRevenue = payments
+                    .Where(p => p.PaymentTime >= monthStart && p.Status == "Thành công")
+                    .Sum(p => p.Amount);
+
+                var thisYearRevenue = payments
+                    .Where(p => p.PaymentTime >= yearStart && p.Status == "Thành công")
+                    .Sum(p => p.Amount);
+
+                // Ticket KPIs
+                var todayTickets = tickets.Count(t => t.CheckInTime.Date == today);
+                var thisMonthTickets = tickets.Count(t => t.CheckInTime >= monthStart);
+
+                // Slot KPIs
+                var occupiedSlots = slots.Count(s => s.Status == "Đang sử dụng");
+                var totalSlots = slots.Count;
+                var slotUtilization = totalSlots > 0 ? (double)occupiedSlots / totalSlots * 100 : 0;
+
+                // Employee KPIs
+                var employeesOnline = employees.Count(e => e.Account?.IsActive == true);  // Simplified: all active accounts = online
+
+                // Customer KPIs
+                var activeMonthlyTickets = monthlyTickets.Count(m => m.Status == "Hoạt động");
+
+                return new DashboardSummaryDto
+                {
+                    TodayRevenue = todayRevenue,
+                    ThisMonthRevenue = thisMonthRevenue,
+                    ThisYearRevenue = thisYearRevenue,
+                    TodayTickets = todayTickets,
+                    ThisMonthTickets = thisMonthTickets,
+                    SlotUtilizationRate = (decimal)slotUtilization,
+                    OccupiedSlots = occupiedSlots,
+                    TotalSlots = totalSlots,
+                    TotalActiveEmployees = employees.Count,
+                    EmployeesOnline = employeesOnline,
+                    TotalCustomers = customers.Count,
+                    ActiveMonthlyTickets = activeMonthlyTickets
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DashboardSummaryDto();
+            }
+        }
+
+        /// <summary>
+        /// Revenue Report
+        /// </summary>
+        public async Task<RevenueReportDto> GetRevenueReportAsync(RevenueReportFilterDto filter)
+        {
+            try
+            {
+                var tickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var payments = (await _paymentRepository.GetAllAsync()).ToList();
+
+                // Date range
+                var from = filter.FromDate ?? DateTime.Now.AddMonths(-1);
+                var to = filter.ToDate ?? DateTime.Now;
+
+                // Filter by date
+                var periodTickets = tickets.Where(t => t.CheckInTime >= from && t.CheckInTime <= to).ToList();
+                var periodPayments = payments
+                    .Where(p => p.PaymentTime >= from && p.PaymentTime <= to && p.Status == "Thành công")
+                    .ToList();
+
+                var totalRevenue = periodPayments.Sum(p => p.Amount);
+                var ticketCount = periodTickets.Count;
+                var avgRevenuePerTicket = ticketCount > 0 ? totalRevenue / ticketCount : 0;
+
+                // By vehicle type
+                var revenueByVehicle = periodTickets
+                    .GroupBy(t => t.VehicleType)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => (decimal)periodPayments.Where(p => p.TicketId != null).Sum(p => p.Amount)
+                    );
+
+                var ticketsByVehicle = periodTickets
+                    .GroupBy(t => t.VehicleType)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                // By payment method
+                var revenueByMethod = periodPayments
+                    .GroupBy(p => p.Method)
+                    .ToDictionary(g => g.Key, g => g.Sum(p => p.Amount));
+
+                // Top customers
+                var topCustomers = periodTickets
+                    .GroupBy(t => t.CustomerId)
+                    .Where(g => !string.IsNullOrEmpty(g.Key))
+                    .OrderByDescending(g => g.Count())
+                    .Take(5)
+                    .Select(g => new TopCustomerDto
+                    {
+                        CustomerId = g.Key,
+                        CustomerName = g.First().Customer?.FullName ?? "Unknown",
+                        TicketCount = g.Count(),
+                        TotalSpent = (decimal)periodPayments.Where(p => p.TicketId != null).Sum(p => p.Amount)
+                    })
+                    .ToList();
+
+                return new RevenueReportDto
+                {
+                    From = from,
+                    To = to,
+                    TotalRevenue = totalRevenue,
+                    TotalTickets = ticketCount,
+                    TotalMonthlyTickets = 0,
+                    RevenueFromSingleTickets = totalRevenue,
+                    RevenueFromMonthlyTickets = 0,
+                    DailyBreakdown = new()
+                };
+            }
+            catch (Exception ex)
+            {
+                return new RevenueReportDto();
+            }
+        }
+
+        /// <summary>
+        /// Customer Report
+        /// </summary>
+        public async Task<CustomerReportDto> GetCustomerReportAsync()
+        {
+            try
+            {
+                var customers = (await _customerRepository.GetAllAsync()).ToList();
+                var tickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var monthlyTickets = (await _monthlyTicketRepository.GetAllAsync()).ToList();
+
+                var thisMonth = DateTime.Now.AddMonths(-1);
+                var newCustomersThisMonth = customers.Count();
+
+                // Customer segments
+                var regularCustomers = customers.Count(c => 
+                    tickets.Count(t => t.CustomerId == c.CustomerId) > 10);
+                var vipCustomers = monthlyTickets.Count(m => m.Status == "Hoạt động");
+                var oneTimeCustomers = customers.Count(c => 
+                    tickets.Count(t => t.CustomerId == c.CustomerId) == 1);
+
+                // Top customers
+                var topCustomers = customers
+                    .Select(c => new CustomerDetailDto
+                    {
+                        CustomerId = c.CustomerId,
+                        FullName = c.FullName,
+                        PhoneNumber = c.PhoneNumber ?? "",
+                        TicketCount = tickets.Count(t => t.CustomerId == c.CustomerId),
+                        TotalSpent = 0,  // TODO: Calculate from payments
+                        HasActiveMonthlyTicket = monthlyTickets.Any(m => m.CustomerId == c.CustomerId && m.Status == "Hoạt động"),
+                        LastVisit = tickets.Where(t => t.CustomerId == c.CustomerId).Max(t => (DateTime?)t.CheckInTime)
+                    })
+                    .OrderByDescending(c => c.TicketCount)
+                    .Take(10)
+                    .ToList();
+
+                return new CustomerReportDto
+                {
+                    TotalCustomers = customers.Count,
+                    NewCustomersThisMonth = newCustomersThisMonth,
+                    ActiveMonthlyTickets = monthlyTickets.Count(m => m.Status == "Hoạt động"),
+                    ExpiredMonthlyTickets = monthlyTickets.Count(m => m.Status == "Hết hạn"),
+                    RegularCustomers = regularCustomers,
+                    VIPCustomers = vipCustomers,
+                    OneTimeCustomers = oneTimeCustomers,
+                    TopCustomers = topCustomers
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomerReportDto();
+            }
+        }
+    }
+}

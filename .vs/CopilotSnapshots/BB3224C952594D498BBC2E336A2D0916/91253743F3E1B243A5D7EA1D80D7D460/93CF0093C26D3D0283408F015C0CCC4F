@@ -1,0 +1,365 @@
+﻿using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+using ParkingManagement.DAL.Interfaces;
+using ParkingManagement.DAL.Models;
+
+namespace ParkingManagement.BLL.Services.Implementations
+{
+    /// <summary>
+    /// Manager Employee Management
+    /// </summary>
+    public class ManagerEmployeeService : IManagerEmployeeService
+    {
+        private readonly IEmployeeRepository _employeeRepository;
+        private readonly IAccountRepository _accountRepository;
+        private readonly IParkingSlotAuditLogRepository _auditLogRepository;
+        private readonly ITicketRepository _ticketRepository;
+
+        public ManagerEmployeeService(
+            IEmployeeRepository employeeRepository,
+            IAccountRepository accountRepository,
+            IParkingSlotAuditLogRepository auditLogRepository,
+            ITicketRepository ticketRepository)
+        {
+            _employeeRepository = employeeRepository;
+            _accountRepository = accountRepository;
+            _auditLogRepository = auditLogRepository;
+            _ticketRepository = ticketRepository;
+        }
+
+        // ── UC-MGR-EMP01: Xem danh sách nhân viên ────────────────
+
+        /// <summary>
+        /// Lấy danh sách nhân viên (filter, search, pagination)
+        /// </summary>
+        public async Task<ListManagerEmployeeDto> GetEmployeesAsync(ManagerEmployeeFilterDto filter)
+        {
+            try
+            {
+                // Lấy tất cả nhân viên (không bị xóa)
+                var allEmployees = (await _employeeRepository.GetAllAsync())
+                    .Where(e => !e.IsDeleted)
+                    .ToList();
+
+                // Áp dụng filters
+                var filtered = allEmployees.AsEnumerable();
+
+                // Filter by status (Active/Deleted - dùng IsDeleted)
+                if (!string.IsNullOrEmpty(filter.Status))
+                {
+                    if (filter.Status == "Hoạt động")
+                        filtered = filtered.Where(e => !e.IsDeleted);
+                    else if (filter.Status == "Vô hiệu hóa")
+                        filtered = filtered.Where(e => e.IsDeleted);
+                }
+
+                // Filter by shift
+                if (!string.IsNullOrEmpty(filter.Shift))
+                    filtered = filtered.Where(e => e.Shift == filter.Shift);
+
+                // Search by name or email
+                if (!string.IsNullOrWhiteSpace(filter.SearchKeyword))
+                {
+                    var keyword = filter.SearchKeyword.Trim().ToLower();
+                    filtered = filtered.Where(e =>
+                        e.FullName.ToLower().Contains(keyword) ||
+                        e.Account?.Username.ToLower().Contains(keyword) == true);
+                }
+
+                // Sort by EmployeeCode DESC
+                var sorted = filtered.OrderByDescending(e => e.EmployeeCode).ToList();
+
+                // Pagination
+                var totalItems = sorted.Count;
+                var totalPages = (int)Math.Ceiling(totalItems / (double)filter.PageSize);
+                var items = sorted
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToList();
+
+                // Map to DTOs
+                var employeeDtos = items.Select(e => new ManagerEmployeeListDto
+                {
+                    EmployeeId = e.EmployeeId,
+                    FullName = e.FullName,
+                    Email = e.Account?.Username ?? "",
+                    PhoneNumber = e.PhoneNumber ?? "",
+                    Shift = e.Shift,
+                    Status = e.IsDeleted ? "Vô hiệu hóa" : "Hoạt động",
+                    CreatedAt = e.Account?.CreatedAt ?? DateTime.Now,
+                    LastLoginAt = null
+                }).ToList();
+
+                // Count active/inactive
+                var totalActive = sorted.Count(e => !e.IsDeleted);
+                var totalInactive = sorted.Count(e => e.IsDeleted);
+
+                return new ListManagerEmployeeDto
+                {
+                    Items = employeeDtos,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    TotalActive = totalActive,
+                    TotalInactive = totalInactive
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ListManagerEmployeeDto
+                {
+                    Items = new(),
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalItems = 0,
+                    TotalPages = 0,
+                    TotalActive = 0,
+                    TotalInactive = 0
+                };
+            }
+        }
+
+        // ── UC-MGR-EMP02: Xem chi tiết + thống kê ────────────────
+
+        /// <summary>
+        /// Lấy chi tiết nhân viên + thống kê công việc
+        /// </summary>
+        public async Task<ManagerEmployeeDetailDto> GetEmployeeDetailAsync(string employeeId)
+        {
+            try
+            {
+                // Tìm employee
+                var employee = await _employeeRepository.GetByIdAsync(employeeId);
+                if (employee == null)
+                    throw new Exception("Nhân viên không tồn tại");
+
+                // Tính thống kê vé (tất cả vé xử lý)
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+
+                var totalTickets = allTickets.Count();
+                var todayTickets = allTickets.Count(t => t.CheckInTime.Date == DateTime.Now.Date);
+                var thisMonthTickets = allTickets.Count(t => 
+                    t.CheckInTime.Year == DateTime.Now.Year && 
+                    t.CheckInTime.Month == DateTime.Now.Month);
+
+                // Tính ngày đầu làm việc (từ Account.CreatedAt)
+                var firstWorkDay = employee.Account?.CreatedAt;
+
+                // Tính tổng ngày làm việc (đếm số ngày khác nhau có check-in)
+                var uniqueWorkDays = allTickets
+                    .Select(t => t.CheckInTime.Date)
+                    .Distinct()
+                    .Count();
+
+                return new ManagerEmployeeDetailDto
+                {
+                    EmployeeId = employee.EmployeeId,
+                    FullName = employee.FullName,
+                    Email = employee.Account?.Username ?? "",
+                    PhoneNumber = employee.PhoneNumber ?? "",
+                    Shift = employee.Shift,
+                    Status = employee.IsDeleted ? "Vô hiệu hóa" : "Hoạt động",
+                    CreatedAt = employee.Account?.CreatedAt ?? DateTime.Now,
+                    LastLoginAt = null,
+                    TotalTicketsProcessed = totalTickets,
+                    TicketsProcessedToday = todayTickets,
+                    TicketsProcessedThisMonth = thisMonthTickets,
+                    FirstWorkDay = firstWorkDay,
+                    WorkDaysCount = uniqueWorkDays
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi lấy chi tiết nhân viên: {ex.Message}");
+            }
+        }
+
+        // ── UC-MGR-EMP03: Thêm nhân viên (invite) ────────────────
+
+        /// <summary>
+        /// Tạo invite nhân viên (gửi link qua email)
+        /// </summary>
+        public async Task<CreateEmployeeInviteResultDto> CreateEmployeeInviteAsync(CreateEmployeeInviteByManagerDto request)
+        {
+            try
+            {
+                // Validate email
+                if (string.IsNullOrWhiteSpace(request.Email))
+                    return new CreateEmployeeInviteResultDto
+                    {
+                        Success = false,
+                        Message = "Email không được để trống"
+                    };
+
+                // Check: Email đã tồn tại?
+                var email = request.Email.Trim().ToLower();
+                var existingAccount = await _accountRepository.GetByUsernameAsync(email);
+                if (existingAccount != null)
+                    return new CreateEmployeeInviteResultDto
+                    {
+                        Success = false,
+                        Message = "Email này đã được đăng ký"
+                    };
+
+                // Tạo EmployeeCode tự động
+                var employeeCode = $"EMP{DateTime.Now.Ticks % 100000:D5}";
+
+                // Tạo EmployeeId
+                var employeeId = $"EMP{DateTime.Now.Ticks % 1000000:D6}";
+
+                // Tạo Account (chưa có password)
+                var accountId = $"ACC{DateTime.Now.Ticks % 100000:D6}";
+                var account = new Account
+                {
+                    AccountId = accountId,
+                    Username = email,
+                    PasswordHash = "", // Empty, sẽ set khi employee confirm
+                    Role = "Employee",
+                    IsActive = false,
+                    CreatedAt = DateTime.Now
+                };
+
+                await _accountRepository.AddAsync(account);
+
+                // Tạo Employee
+                var employee = new Employee
+                {
+                    EmployeeId = employeeId,
+                    EmployeeCode = employeeCode,
+                    AccountId = accountId,
+                    FullName = "", // Sẽ điền sau qua invite
+                    PhoneNumber = "",
+                    Shift = request.Shift,
+                    IsDeleted = false
+                };
+
+                await _employeeRepository.AddAsync(employee);
+
+                // Tạo invite token
+                var inviteToken = Guid.NewGuid().ToString();
+                var inviteExpiry = DateTime.Now.AddDays(7);
+
+                return new CreateEmployeeInviteResultDto
+                {
+                    Success = true,
+                    Message = "Tạo invite thành công. Vui lòng gửi email cho nhân viên.",
+                    EmployeeCode = employeeCode,
+                    InviteToken = inviteToken,
+                    InviteExpiry = inviteExpiry
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CreateEmployeeInviteResultDto
+                {
+                    Success = false,
+                    Message = $"Lỗi tạo invite: {ex.Message}"
+                };
+            }
+        }
+
+        // ── UC-MGR-EMP04: Cập nhật nhân viên ─────────────────────
+
+        /// <summary>
+        /// Cập nhật thông tin nhân viên
+        /// </summary>
+        public async Task<UpdateEmployeeResultDto> UpdateEmployeeAsync(string employeeId, UpdateEmployeeByManagerDto request)
+        {
+            try
+            {
+                // Tìm employee
+                var employee = await _employeeRepository.GetByIdAsync(employeeId);
+                if (employee == null)
+                    return new UpdateEmployeeResultDto
+                    {
+                        Success = false,
+                        Message = "Nhân viên không tồn tại"
+                    };
+
+                // Cập nhật fields
+                if (!string.IsNullOrWhiteSpace(request.FullName))
+                    employee.FullName = request.FullName.Trim();
+
+                if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+                    employee.PhoneNumber = request.PhoneNumber.Trim();
+
+                if (!string.IsNullOrEmpty(request.Shift))
+                    employee.Shift = request.Shift;
+
+                // Update Status (IsDeleted)
+                if (!string.IsNullOrEmpty(request.Status))
+                {
+                    if (request.Status == "Vô hiệu hóa")
+                        employee.IsDeleted = true;
+                    else if (request.Status == "Hoạt động")
+                        employee.IsDeleted = false;
+                }
+
+                await _employeeRepository.UpdateAsync(employee);
+
+                return new UpdateEmployeeResultDto
+                {
+                    Success = true,
+                    Message = "Cập nhật thông tin nhân viên thành công"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new UpdateEmployeeResultDto
+                {
+                    Success = false,
+                    Message = $"Lỗi cập nhật nhân viên: {ex.Message}"
+                };
+            }
+        }
+
+        // ── UC-MGR-EMP05: Xóa nhân viên (soft delete) ────────────
+
+        /// <summary>
+        /// Xóa (vô hiệu hóa) nhân viên
+        /// </summary>
+        public async Task<DeleteEmployeeResultDto> DeleteEmployeeAsync(DeleteEmployeeDto request)
+        {
+            try
+            {
+                // Tìm employee
+                var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId);
+                if (employee == null)
+                    return new DeleteEmployeeResultDto
+                    {
+                        Success = false,
+                        Message = "Nhân viên không tồn tại"
+                    };
+
+                // Soft delete: Update IsDeleted
+                employee.IsDeleted = true;
+
+                // Lock account
+                if (employee.Account != null)
+                {
+                    employee.Account.IsActive = false;
+                }
+
+                await _employeeRepository.UpdateAsync(employee);
+
+                return new DeleteEmployeeResultDto
+                {
+                    Success = true,
+                    Message = "Vô hiệu hóa nhân viên thành công",
+                    EmployeeId = request.EmployeeId,
+                    NewStatus = "Vô hiệu hóa"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new DeleteEmployeeResultDto
+                {
+                    Success = false,
+                    Message = $"Lỗi vô hiệu hóa nhân viên: {ex.Message}",
+                    EmployeeId = request.EmployeeId
+                };
+            }
+        }
+    }
+}

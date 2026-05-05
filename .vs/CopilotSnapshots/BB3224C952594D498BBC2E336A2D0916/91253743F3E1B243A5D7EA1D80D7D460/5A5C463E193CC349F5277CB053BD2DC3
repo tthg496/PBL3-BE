@@ -1,0 +1,11 @@
+﻿using ParkingManagement.BLL.DTOs;
+
+namespace ParkingManagement.BLL.Services.Interfaces
+{
+    public interface IReportService
+    {
+        Task<RevenueReportDto> GetRevenueReportAsync(DateTime from, DateTime to);
+        Task<List<MonthlyTicketDto>> GetExpiringSoonAsync(int days = 7);
+        Task<int> CountActiveVehiclesAsync();
+    }
+}

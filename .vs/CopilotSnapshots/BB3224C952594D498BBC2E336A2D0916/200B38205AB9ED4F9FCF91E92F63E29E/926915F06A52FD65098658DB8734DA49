@@ -1,0 +1,201 @@
+﻿using Microsoft.EntityFrameworkCore;
+using ParkingManagement.DAL.Models;
+
+namespace ParkingManagement.DAL.Data
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+        // ── DbSets ───────────────────────────────────────────────────
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<EmployeeInvite> EmployeeInvites { get; set; }
+        public DbSet<Manager> Managers { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<ParkingSlot> ParkingSlots { get; set; }
+        public DbSet<ParkingSlotAuditLog> ParkingSlotAuditLogs { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<MonthlyTicket> MonthlyTickets { get; set; }
+        public DbSet<Reservation> Reservations { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Otp> Otps { get; set; }
+        public DbSet<PricingConfiguration> PricingConfigurations { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // ── Unique constraints ────────────────────────────────────
+            modelBuilder.Entity<Account>()
+                .HasIndex(a => a.Username).IsUnique();
+            modelBuilder.Entity<Account>()
+                .HasIndex(a => a.Email).IsUnique();
+
+            // ── Account → Customer (1-1) ──────────────────────────────
+            modelBuilder.Entity<Account>()
+                .HasOne(a => a.Customer)
+                .WithOne(c => c.Account)
+                .HasForeignKey<Customer>(c => c.AccountId);
+
+            // ── Account → Employee (1-1) ──────────────────────────────
+            modelBuilder.Entity<Account>()
+                .HasOne(a => a.Employee)
+                .WithOne(e => e.Account)
+                .HasForeignKey<Employee>(e => e.AccountId);
+
+            // ── Account → Manager (1-1) ───────────────────────────────
+            modelBuilder.Entity<Account>()
+                .HasOne(a => a.Manager)
+                .WithOne(m => m.Account)
+                .HasForeignKey<Manager>(m => m.AccountId);
+
+            // ── Manager → Employee (1-N) ──────────────────────────────
+            modelBuilder.Entity<Manager>()
+                .HasMany(m => m.Employees)
+                .WithOne(e => e.Manager)
+                .HasForeignKey(e => e.ManagerId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // ── OTP Configuration ─────────────────────────────────────
+            modelBuilder.Entity<Otp>()
+                .HasIndex(o => o.Email);
+
+            // ── Payment: chỉ 1 trong 2 FK có giá trị ─────────────────
+            modelBuilder.Entity<Payment>()
+                .ToTable(tb => tb.HasCheckConstraint(
+                    "CK_Payment_TicketOrMonthly",
+                    "(TicketId IS NOT NULL AND MonthlyTicketId IS NULL) OR (TicketId IS NULL AND MonthlyTicketId IS NOT NULL)"));
+
+            // ── Check constraints ─────────────────────────────────────
+            modelBuilder.Entity<ParkingSlot>()
+                .ToTable(tb => tb.HasCheckConstraint(
+                    "CK_ParkingSlot_Status",
+                    "Status IN (N'Trống', N'Đang sử dụng', N'Đã đặt', N'Bảo trì')"));
+
+            modelBuilder.Entity<Vehicle>()
+                .ToTable(tb => tb.HasCheckConstraint(
+                    "CK_Vehicle_Type",
+                    "VehicleType IN (N'Xe máy', N'Ô tô nhỏ', N'Ô tô lớn')"));
+
+            modelBuilder.Entity<Ticket>()
+                .ToTable(tb => tb.HasCheckConstraint(
+                    "CK_Ticket_Status",
+                    "Status IN (N'Đang trong bãi', N'Đã ra')"));
+
+            modelBuilder.Entity<MonthlyTicket>()
+                .ToTable(tb => tb.HasCheckConstraint(
+                    "CK_MonthlyTicket_Status",
+                    "Status IN (N'Hoạt động', N'Hết hạn', N'Đã hủy')"));
+
+            modelBuilder.Entity<Reservation>()
+                .ToTable(tb => tb.HasCheckConstraint(
+                    "CK_Reservation_Status",
+                    "Status IN (N'Chờ', N'Đã nhận', N'Hủy', N'Hết hạn')"));
+
+            // ── Seed data ─────────────────────────────────────────────
+            SeedData(modelBuilder);
+        }
+
+        private static void SeedData(ModelBuilder modelBuilder)
+        {
+            // ── Accounts ──────────────────────────────────────────────
+            // Mật khẩu gốc: Quanly@2026 / Nhanvien@2026 / Khachhang@2026
+            modelBuilder.Entity<Account>().HasData(
+                new Account { AccountId = "ACC001", Username = "nguyen.thanh.tung", PasswordHash = "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMaJnFd1jC9s5sJq1bKx5HY4i6", Role = "Manager", Email = "tung.ql@baixetranphu.vn", CreatedAt = new DateTime(2026, 1, 1), IsActive = true },
+                new Account { AccountId = "ACC002", Username = "tran.thi.mai", PasswordHash = "$2a$12$XpV8cBnqRT5HaK2dLM7OiuZqY1P4sNwFhG9rU3vKj6mE0eXcQl8n2", Role = "Employee", Email = "mai.nv@baixetranphu.vn", CreatedAt = new DateTime(2026, 1, 1), IsActive = true },
+                new Account { AccountId = "ACC003", Username = "le.van.hung", PasswordHash = "$2a$12$XpV8cBnqRT5HaK2dLM7OiuZqY1P4sNwFhG9rU3vKj6mE0eXcQl8n2", Role = "Employee", Email = "hung.nv@baixetranphu.vn", CreatedAt = new DateTime(2026, 1, 1), IsActive = true },
+                new Account { AccountId = "ACC004", Username = "pham.quoc.bao", PasswordHash = "$2a$12$9kM4pJ3wC8zN2vR7xF5qEuY6tL0sG1hB4dI8nK3oS2aA7cW9mP1y0", Role = "Customer", Email = "baopq@gmail.com", CreatedAt = new DateTime(2026, 1, 15), IsActive = true },
+                new Account { AccountId = "ACC005", Username = "ho.thi.lan", PasswordHash = "$2a$12$9kM4pJ3wC8zN2vR7xF5qEuY6tL0sG1hB4dI8nK3oS2aA7cW9mP1y0", Role = "Customer", Email = "lanhothuy@gmail.com", CreatedAt = new DateTime(2026, 2, 3), IsActive = true },
+                new Account { AccountId = "ACC006", Username = "dang.minh.khoa", PasswordHash = "$2a$12$9kM4pJ3wC8zN2vR7xF5qEuY6tL0sG1hB4dI8nK3oS2aA7cW9mP1y0", Role = "Customer", Email = "khoaRacing2001@gmail.com", CreatedAt = new DateTime(2026, 2, 20), IsActive = true },
+                new Account { AccountId = "ACC007", Username = "nguyen.thu.huong", PasswordHash = "$2a$12$9kM4pJ3wC8zN2vR7xF5qEuY6tL0sG1hB4dI8nK3oS2aA7cW9mP1y0", Role = "Customer", Email = "thuhuong.ntn@yahoo.com", CreatedAt = new DateTime(2026, 3, 1), IsActive = true }
+            );
+
+            // ── Managers ──────────────────────────────────────────────
+            modelBuilder.Entity<Manager>().HasData(
+                new Manager { ManagerId = "MGR001", AccountId = "ACC001", FullName = "Nguyễn Thành Tùng", PhoneNumber = "0901234567", Gender = "Male", IsDeleted = false }
+            );
+
+            // ── Employees ─────────────────────────────────────────────
+            modelBuilder.Entity<Employee>().HasData(
+                new Employee { EmployeeId = "EMP001", EmployeeCode = "EMP001", AccountId = "ACC002", FullName = "Trần Thị Mai", PhoneNumber = "0912345678", Gender = "Female", Shift = "Sáng", ManagerId = "MGR001", IsDeleted = false },
+                new Employee { EmployeeId = "EMP002", EmployeeCode = "EMP002", AccountId = "ACC003", FullName = "Lê Văn Hùng", PhoneNumber = "0923456789", Gender = "Male", Shift = "Chiều", ManagerId = "MGR001", IsDeleted = false }
+            );
+
+            // ── Customers ─────────────────────────────────────────────
+            modelBuilder.Entity<Customer>().HasData(
+                new Customer { CustomerId = "CUS001", AccountId = "ACC004", FullName = "Phạm Quốc Bảo", PhoneNumber = "0931122334", Gender = "Male", IsDeleted = false },
+                new Customer { CustomerId = "CUS002", AccountId = "ACC005", FullName = "Hồ Thị Lan", PhoneNumber = "0942233445", Gender = "Female", IsDeleted = false },
+                new Customer { CustomerId = "CUS003", AccountId = "ACC006", FullName = "Đặng Minh Khoa", PhoneNumber = "0953344556", Gender = "Male", IsDeleted = false },
+                new Customer { CustomerId = "CUS004", AccountId = "ACC007", FullName = "Nguyễn Thị Thu Hương", PhoneNumber = "0964455667", Gender = "Female", IsDeleted = false }
+            );
+
+            // ── Vehicles ──────────────────────────────────────────────
+            // Biển số Đà Nẵng đầu 43
+            modelBuilder.Entity<Vehicle>().HasData(
+                new Vehicle { VehiclePlate = "43A-123.45", VehicleType = "Xe máy", CustomerId = "CUS001" },
+                new Vehicle { VehiclePlate = "43B-456.78", VehicleType = "Ô tô nhỏ", CustomerId = "CUS002" },
+                new Vehicle { VehiclePlate = "43C-789.01", VehicleType = "Xe máy", CustomerId = "CUS003" },
+                new Vehicle { VehiclePlate = "43D-234.56", VehicleType = "Ô tô lớn", CustomerId = "CUS004" },
+                new Vehicle { VehiclePlate = "51G-888.88", VehicleType = "Ô tô nhỏ", CustomerId = "CUS001" } // Xe TP.HCM, đăng ký vé tháng tại đây
+            );
+
+            // ── ParkingSlots ──────────────────────────────────────────
+            // Khu A: xe máy | Khu B: ô tô nhỏ | Khu C: ô tô lớn
+            modelBuilder.Entity<ParkingSlot>().HasData(
+                new ParkingSlot { SlotId = "A01", Location = "Khu A - Ô 01", VehicleType = "Xe máy", Status = "Đang sử dụng", LastUpdated = new DateTime(2026, 5, 10, 8, 23, 0) },
+                new ParkingSlot { SlotId = "A02", Location = "Khu A - Ô 02", VehicleType = "Xe máy", Status = "Trống", LastUpdated = new DateTime(2026, 5, 9, 17, 30, 0) },
+                new ParkingSlot { SlotId = "A03", Location = "Khu A - Ô 03", VehicleType = "Xe máy", Status = "Trống", LastUpdated = new DateTime(2026, 5, 8, 12, 0, 0) },
+                new ParkingSlot { SlotId = "A04", Location = "Khu A - Ô 04", VehicleType = "Xe máy", Status = "Đã đặt", LastUpdated = new DateTime(2026, 5, 10, 10, 0, 0) },
+                new ParkingSlot { SlotId = "A05", Location = "Khu A - Ô 05", VehicleType = "Xe máy", Status = "Trống", LastUpdated = new DateTime(2026, 5, 10, 0, 0, 0) },
+                new ParkingSlot { SlotId = "B01", Location = "Khu B - Ô 01", VehicleType = "Ô tô nhỏ", Status = "Đang sử dụng", LastUpdated = new DateTime(2026, 5, 10, 9, 5, 0) },
+                new ParkingSlot { SlotId = "B02", Location = "Khu B - Ô 02", VehicleType = "Ô tô nhỏ", Status = "Trống", LastUpdated = new DateTime(2026, 5, 10, 0, 0, 0) },
+                new ParkingSlot { SlotId = "B03", Location = "Khu B - Ô 03", VehicleType = "Ô tô nhỏ", Status = "Trống", LastUpdated = new DateTime(2026, 5, 10, 0, 0, 0) },
+                new ParkingSlot { SlotId = "C01", Location = "Khu C - Ô 01", VehicleType = "Ô tô lớn", Status = "Đang sử dụng", LastUpdated = new DateTime(2026, 5, 1, 0, 0, 0) },
+                new ParkingSlot { SlotId = "C02", Location = "Khu C - Ô 02", VehicleType = "Ô tô lớn", Status = "Trống", LastUpdated = new DateTime(2026, 5, 10, 0, 0, 0) }
+            );
+
+            // ── Tickets (vé lượt) ─────────────────────────────────────
+            modelBuilder.Entity<Ticket>().HasData(
+                // Đang trong bãi — khách có tài khoản
+                new Ticket { TicketId = "TKT001", CustomerId = "CUS001", VehiclePlate = "43A-123.45", VehicleType = "Xe máy", SlotId = "A01", CheckInTime = new DateTime(2026, 5, 10, 8, 23, 0), CheckOutTime = null, Fee = 0, Status = "Đang trong bãi" },
+                new Ticket { TicketId = "TKT002", CustomerId = "CUS002", VehiclePlate = "43B-456.78", VehicleType = "Ô tô nhỏ", SlotId = "B01", CheckInTime = new DateTime(2026, 5, 10, 9, 5, 0), CheckOutTime = null, Fee = 0, Status = "Đang trong bãi" },
+                // Đang trong bãi — khách VÃNG LAI (CustomerId = null)
+                new Ticket { TicketId = "TKT003", CustomerId = null, VehiclePlate = "92C-111.22", VehicleType = "Xe máy", SlotId = "A05", CheckInTime = new DateTime(2026, 5, 10, 10, 15, 0), CheckOutTime = null, Fee = 0, Status = "Đang trong bãi" },
+                // Lịch sử đã ra — khách có tài khoản
+                new Ticket { TicketId = "TKT004", CustomerId = "CUS003", VehiclePlate = "43C-789.01", VehicleType = "Xe máy", SlotId = "A02", CheckInTime = new DateTime(2026, 5, 9, 14, 0, 0), CheckOutTime = new DateTime(2026, 5, 9, 17, 30, 0), Fee = 10500, Status = "Đã ra" },
+                new Ticket { TicketId = "TKT005", CustomerId = "CUS001", VehiclePlate = "43A-123.45", VehicleType = "Xe máy", SlotId = "A03", CheckInTime = new DateTime(2026, 5, 8, 7, 30, 0), CheckOutTime = new DateTime(2026, 5, 8, 12, 0, 0), Fee = 13500, Status = "Đã ra" },
+                new Ticket { TicketId = "TKT006", CustomerId = "CUS002", VehiclePlate = "43B-456.78", VehicleType = "Ô tô nhỏ", SlotId = "B02", CheckInTime = new DateTime(2026, 5, 7, 8, 0, 0), CheckOutTime = new DateTime(2026, 5, 7, 11, 0, 0), Fee = 24000, Status = "Đã ra" },
+                // Lịch sử đã ra — khách VÃNG LAI
+                new Ticket { TicketId = "TKT007", CustomerId = null, VehiclePlate = "74A-567.89", VehicleType = "Ô tô nhỏ", SlotId = "B03", CheckInTime = new DateTime(2026, 5, 9, 9, 0, 0), CheckOutTime = new DateTime(2026, 5, 9, 12, 30, 0), Fee = 24000, Status = "Đã ra" }
+            );
+
+            // ── MonthlyTickets (vé tháng) — độc lập, không gắn slot ──
+            modelBuilder.Entity<MonthlyTicket>().HasData(
+                new MonthlyTicket { MonthlyTicketId = "MTK001", CustomerId = "CUS004", VehiclePlate = "43D-234.56", VehicleType = "Ô tô lớn", StartDate = new DateTime(2026, 5, 1), EndDate = new DateTime(2026, 5, 31), PackageType = "1 tháng", TotalFee = 350000, Status = "Hoạt động", CreatedAt = new DateTime(2026, 5, 1, 9, 0, 0) },
+                new MonthlyTicket { MonthlyTicketId = "MTK002", CustomerId = "CUS001", VehiclePlate = "51G-888.88", VehicleType = "Ô tô nhỏ", StartDate = new DateTime(2026, 4, 1), EndDate = new DateTime(2026, 6, 30), PackageType = "3 tháng", TotalFee = 650000, Status = "Hoạt động", CreatedAt = new DateTime(2026, 4, 1, 10, 0, 0) },
+                new MonthlyTicket { MonthlyTicketId = "MTK003", CustomerId = "CUS003", VehiclePlate = "43C-789.01", VehicleType = "Xe máy", StartDate = new DateTime(2026, 3, 1), EndDate = new DateTime(2026, 3, 31), PackageType = "1 tháng", TotalFee = 150000, Status = "Hết hạn", CreatedAt = new DateTime(2026, 3, 1, 8, 0, 0) }
+            );
+
+            // ── Reservations (đặt chỗ trước) ─────────────────────────
+            modelBuilder.Entity<Reservation>().HasData(
+                new Reservation { ReservationId = "RES001", CustomerId = "CUS003", VehiclePlate = "43C-789.01", SlotId = "A04", ExpectedTime = new DateTime(2026, 5, 10, 14, 0, 0), CreatedAt = new DateTime(2026, 5, 10, 10, 0, 0), Status = "Chờ" },
+                new Reservation { ReservationId = "RES002", CustomerId = "CUS002", VehiclePlate = "43B-456.78", SlotId = "B03", ExpectedTime = new DateTime(2026, 5, 8, 8, 0, 0), CreatedAt = new DateTime(2026, 5, 7, 20, 0, 0), Status = "Đã nhận" }
+            );
+
+            // ── Payments ──────────────────────────────────────────────
+            modelBuilder.Entity<Payment>().HasData(
+                // Thanh toán vé lượt
+                new Payment { PaymentId = "PAY001", TicketId = "TKT004", MonthlyTicketId = null, Amount = 10500, Method = "Tiền mặt", PaymentTime = new DateTime(2026, 5, 9, 17, 31, 0), Status = "Thành công" },
+                new Payment { PaymentId = "PAY002", TicketId = "TKT005", MonthlyTicketId = null, Amount = 13500, Method = "Chuyển khoản", PaymentTime = new DateTime(2026, 5, 8, 12, 1, 0), Status = "Thành công" },
+                new Payment { PaymentId = "PAY003", TicketId = "TKT006", MonthlyTicketId = null, Amount = 24000, Method = "Tiền mặt", PaymentTime = new DateTime(2026, 5, 7, 11, 1, 0), Status = "Thành công" },
+                new Payment { PaymentId = "PAY004", TicketId = "TKT007", MonthlyTicketId = null, Amount = 24000, Method = "Tiền mặt", PaymentTime = new DateTime(2026, 5, 9, 12, 31, 0), Status = "Thành công" },
+                // Thanh toán vé tháng
+                new Payment { PaymentId = "PAY005", TicketId = null, MonthlyTicketId = "MTK001", Amount = 350000, Method = "Ví điện tử", PaymentTime = new DateTime(2026, 5, 1, 9, 5, 0), Status = "Thành công" },
+                new Payment { PaymentId = "PAY006", TicketId = null, MonthlyTicketId = "MTK002", Amount = 650000, Method = "Chuyển khoản", PaymentTime = new DateTime(2026, 4, 1, 10, 5, 0), Status = "Thành công" },
+                new Payment { PaymentId = "PAY007", TicketId = null, MonthlyTicketId = "MTK003", Amount = 150000, Method = "Tiền mặt", PaymentTime = new DateTime(2026, 3, 1, 8, 5, 0), Status = "Thành công" }
+            );
+        }
+    }
+}

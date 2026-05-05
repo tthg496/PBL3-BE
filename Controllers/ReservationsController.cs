@@ -1,0 +1,119 @@
+using Microsoft.AspNetCore.Mvc;
+using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+
+namespace ParkingManagement.Web.Controllers.Api
+{
+    /// <summary>
+    /// API for Reservation Management
+    /// </summary>
+    [ApiController]
+    [Route("api/reservations")]
+    [Produces("application/json")]
+    public class ReservationsController : ControllerBase
+    {
+        private readonly IReservationService _reservationService;
+
+        public ReservationsController(IReservationService reservationService)
+        {
+            _reservationService = reservationService;
+        }
+
+        /// <summary>
+        /// Get all reservations
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(List<ReservationDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _reservationService.GetAllAsync();
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get reservations by customer
+        /// </summary>
+        [HttpGet("customer/{customerId}")]
+        [ProducesResponseType(typeof(List<ReservationDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByCustomerId(string customerId)
+        {
+            var result = await _reservationService.GetByCustomerIdAsync(customerId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get reservation by ID
+        /// </summary>
+        [HttpGet("{reservationId}")]
+        [ProducesResponseType(typeof(ReservationDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById(string reservationId)
+        {
+            // TODO: Implement GetByIdAsync method in service or repository
+            return StatusCode(StatusCodes.Status501NotImplemented, "Not yet implemented");
+        }
+
+        /// <summary>
+        /// Create new reservation
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(ServiceResult<ReservationDto>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ServiceResult<ReservationDto>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Create([FromBody] CreateReservationDto dto)
+        {
+            var result = await _reservationService.CreateAsync(dto);
+            if (!result.Success)
+                return BadRequest(result);
+            return CreatedAtAction(nameof(GetById), new { reservationId = result.Data?.ReservationId }, result);
+        }
+
+        /// <summary>
+        /// Update reservation
+        /// </summary>
+        [HttpPut("{reservationId}")]
+        [ProducesResponseType(typeof(ServiceResult<ReservationDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ServiceResult<ReservationDto>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Update(string reservationId, [FromBody] object dto)
+        {
+            // TODO: Implement UpdateReservationDto and UpdateAsync method in service
+            return StatusCode(StatusCodes.Status501NotImplemented, "Not yet implemented");
+        }
+
+        /// <summary>
+        /// Cancel reservation
+        /// </summary>
+        [HttpDelete("{reservationId}")]
+        [ProducesResponseType(typeof(ServiceResult<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ServiceResult<string>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Cancel(string reservationId)
+        {
+            var result = await _reservationService.CancelAsync(reservationId);
+            if (!result.Success)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Confirm reservation (convert to active ticket)
+        /// </summary>
+        [HttpPost("{reservationId}/confirm")]
+        [ProducesResponseType(typeof(ServiceResult<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ServiceResult<string>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Confirm(string reservationId)
+        {
+            // TODO: Implement ConfirmAsync method in service
+            return StatusCode(StatusCodes.Status501NotImplemented, "Not yet implemented");
+        }
+
+        /// <summary>
+        /// Get available time slots for reservation
+        /// </summary>
+        [HttpGet("available-slots")]
+        [ProducesResponseType(typeof(List<object>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAvailableSlots([FromQuery] string vehicleType, [FromQuery] DateTime checkInTime)
+        {
+            // TODO: Implement GetAvailableSlotsAsync method in service
+            return StatusCode(StatusCodes.Status501NotImplemented, "Not yet implemented");
+        }
+    }
+}

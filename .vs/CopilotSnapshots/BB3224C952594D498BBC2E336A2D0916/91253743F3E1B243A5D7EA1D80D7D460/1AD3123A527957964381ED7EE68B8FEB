@@ -1,0 +1,25 @@
+﻿using ParkingManagement.BLL.DTOs;
+
+namespace ParkingManagement.BLL.Services.Interfaces
+{
+    /// <summary>
+    /// Manager Report & Dashboard Service
+    /// </summary>
+    public interface IManagerReportService
+    {
+        /// <summary>
+        /// Dashboard Summary - 5 KPI
+        /// </summary>
+        Task<DashboardSummaryDto> GetDashboardSummaryAsync();
+
+        /// <summary>
+        /// Revenue Report
+        /// </summary>
+        Task<RevenueReportDto> GetRevenueReportAsync(RevenueReportFilterDto filter);
+
+        /// <summary>
+        /// Customer Report
+        /// </summary>
+        Task<CustomerReportDto> GetCustomerReportAsync();
+    }
+}

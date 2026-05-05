@@ -1,0 +1,25 @@
+﻿using ParkingManagement.BLL.DTOs;
+
+namespace ParkingManagement.BLL.Services.Interfaces
+{
+    /// <summary>
+    /// Employee Report & Statistics Service
+    /// </summary>
+    public interface IEmployeeReportService
+    {
+        /// <summary>
+        /// Lấy dashboard cá nhân (My Performance)
+        /// </summary>
+        Task<EmployeeDashboardDto> GetDashboardAsync(string employeeId);
+
+        /// <summary>
+        /// Lấy báo cáo điểm danh ca làm
+        /// </summary>
+        Task<ShiftAttendanceReportDto> GetShiftAttendanceReportAsync(string employeeId, DateTime? fromDate = null, DateTime? toDate = null);
+
+        /// <summary>
+        /// Lấy báo cáo doanh thu
+        /// </summary>
+        Task<EmployeeRevenueReportDto> GetRevenueReportAsync(string employeeId, string period = "month");
+    }
+}

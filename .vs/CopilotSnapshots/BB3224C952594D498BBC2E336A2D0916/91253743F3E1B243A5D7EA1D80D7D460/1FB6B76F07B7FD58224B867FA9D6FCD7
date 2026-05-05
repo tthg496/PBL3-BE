@@ -1,0 +1,30 @@
+﻿using ParkingManagement.BLL.DTOs;
+
+namespace ParkingManagement.BLL.Services.Interfaces
+{
+    /// <summary>
+    /// Manager Parking Slot Management Service
+    /// </summary>
+    public interface IParkingSlotManagementService
+    {
+        /// <summary>
+        /// Get list of parking slots (filter, search, pagination)
+        /// </summary>
+        Task<ListParkingSlotDto> GetParkingSlotsAsync(ParkingSlotFilterDto filter);
+
+        /// <summary>
+        /// Get parking slot detail + statistics
+        /// </summary>
+        Task<ParkingSlotDetailDto> GetParkingSlotDetailAsync(string slotId);
+
+        /// <summary>
+        /// Get parking slot report
+        /// </summary>
+        Task<ParkingSlotReportDto> GetParkingSlotReportAsync();
+
+        /// <summary>
+        /// Update parking slot status
+        /// </summary>
+        Task<UpdateParkingSlotResultDto> UpdateParkingSlotAsync(UpdateParkingSlotDto request);
+    }
+}

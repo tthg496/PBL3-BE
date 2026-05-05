@@ -1,0 +1,48 @@
+﻿using Microsoft.EntityFrameworkCore;
+using ParkingManagement.DAL.Entities;
+
+namespace ParkingManagement.DAL.Data;
+
+public class ParkingDbContext(DbContextOptions<ParkingDbContext> options) : DbContext(options)
+{
+    public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<Ticket> Tickets => Set<Ticket>();
+    public DbSet<ParkingArea> ParkingAreas => Set<ParkingArea>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Vehicle configuration
+        modelBuilder.Entity<Vehicle>(entity =>
+        {
+            entity.HasIndex(v => v.LicensePlate).IsUnique();
+            entity.Property(v => v.VehicleType)
+                  .HasConversion<string>();
+        });
+
+        // ParkingArea configuration
+        modelBuilder.Entity<ParkingArea>(entity =>
+        {
+            entity.ToTable(t => t.HasCheckConstraint("CK_ParkingArea_AvailableSlots",
+                "[AvailableSlots] >= 0 AND [AvailableSlots] <= [Capacity]"));
+        });
+
+        // Ticket configuration
+        modelBuilder.Entity<Ticket>(entity =>
+        {
+            entity.Property(t => t.Status)
+                  .HasConversion<string>();
+
+            entity.HasOne(t => t.Vehicle)
+                  .WithMany(v => v.Tickets)
+                  .HasForeignKey(t => t.VehicleId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(t => t.ParkingArea)
+                  .WithMany(p => p.Tickets)
+                  .HasForeignKey(t => t.ParkingAreaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+}

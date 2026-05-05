@@ -1,0 +1,166 @@
+﻿using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+using ParkingManagement.DAL.Interfaces;
+
+namespace ParkingManagement.BLL.Services.Implementations
+{
+    /// <summary>
+    /// Employee Parking Slot Management
+    /// </summary>
+    public class EmployeeSlotManagementService : IEmployeeSlotManagementService
+    {
+        private readonly IParkingSlotRepository _parkingSlotRepository;
+        private readonly ITicketRepository _ticketRepository;
+
+        public EmployeeSlotManagementService(
+            IParkingSlotRepository parkingSlotRepository,
+            ITicketRepository ticketRepository)
+        {
+            _parkingSlotRepository = parkingSlotRepository;
+            _ticketRepository = ticketRepository;
+        }
+
+        /// <summary>
+        /// Lấy danh sách chỗ đỗ (filter, pagination)
+        /// </summary>
+        public async Task<ListEmployeeSlotDto> GetSlotsAsync(EmployeeSlotFilterDto filter)
+        {
+            try
+            {
+                var allSlots = (await _parkingSlotRepository.GetAllAsync()).ToList();
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+
+                // Apply filters
+                var filtered = allSlots.AsEnumerable();
+
+                if (!string.IsNullOrEmpty(filter.VehicleType))
+                    filtered = filtered.Where(s => s.VehicleType == filter.VehicleType);
+
+                if (!string.IsNullOrEmpty(filter.Status))
+                    filtered = filtered.Where(s => s.Status == filter.Status);
+
+                if (!string.IsNullOrEmpty(filter.Location))
+                    filtered = filtered.Where(s => s.Location == filter.Location);
+
+                var sorted = filtered.OrderBy(s => s.SlotId).ToList();
+
+                // Pagination
+                var totalItems = sorted.Count;
+                var totalPages = (int)Math.Ceiling(totalItems / (double)filter.PageSize);
+                var items = sorted
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToList();
+
+                // Map to DTOs
+                var slotDtos = items.Select(s =>
+                {
+                    var currentTicket = allTickets.FirstOrDefault(t => 
+                        t.SlotId == s.SlotId && string.IsNullOrEmpty(t.CheckOutTime.ToString()));
+
+                    return new EmployeeSlotListItemDto
+                    {
+                        SlotId = s.SlotId,
+                        VehicleType = s.VehicleType,
+                        Location = s.Location,
+                        Status = s.Status,
+                        IsAvailable = s.Status == "Trống",
+                        CurrentOccupant = currentTicket?.VehiclePlate,
+                        OccupiedSince = currentTicket?.CheckInTime
+                    };
+                }).ToList();
+
+                var totalEmpty = sorted.Count(s => s.Status == "Trống");
+                var totalOccupied = sorted.Count(s => s.Status == "Đang sử dụng");
+                var totalMaintenance = sorted.Count(s => s.Status == "Bảo trì");
+                var utilization = sorted.Count > 0
+                    ? (double)totalOccupied / sorted.Count * 100
+                    : 0;
+
+                return new ListEmployeeSlotDto
+                {
+                    Items = slotDtos,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    TotalEmpty = totalEmpty,
+                    TotalOccupied = totalOccupied,
+                    TotalMaintenance = totalMaintenance,
+                    UtilizationRate = utilization
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ListEmployeeSlotDto
+                {
+                    Items = new(),
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalItems = 0,
+                    TotalPages = 0,
+                    TotalEmpty = 0,
+                    TotalOccupied = 0,
+                    TotalMaintenance = 0,
+                    UtilizationRate = 0
+                };
+            }
+        }
+
+        /// <summary>
+        /// Lấy chi tiết chỗ đỗ
+        /// </summary>
+        public async Task<EmployeeSlotDetailDto> GetSlotDetailAsync(string slotId)
+        {
+            try
+            {
+                var slot = await _parkingSlotRepository.GetByIdAsync(slotId);
+                if (slot == null)
+                    throw new Exception("Chỗ đỗ không tồn tại");
+
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var slotTickets = allTickets.Where(t => t.SlotId == slotId).ToList();
+
+                var thisMonth = DateTime.Now.AddMonths(-1);
+                var thisWeek = DateTime.Now.AddDays(-7);
+
+                var usageThisMonth = slotTickets.Count(t => t.CheckInTime >= thisMonth);
+                var usageThisWeek = slotTickets.Count(t => t.CheckInTime >= thisWeek);
+                var lastUsed = slotTickets.Count > 0
+                    ? slotTickets.Max(t => t.CheckOutTime ?? t.CheckInTime)
+                    : (DateTime?)null;
+
+                var avgOccupancyTime = slotTickets.Count > 0
+                    ? slotTickets.Where(t => t.CheckOutTime.HasValue)
+                        .Average(t => (t.CheckOutTime.Value - t.CheckInTime).TotalMinutes)
+                    : 0;
+
+                var currentTicket = slotTickets.FirstOrDefault(t => string.IsNullOrEmpty(t.CheckOutTime.ToString()));
+                var occupancyMinutes = currentTicket != null
+                    ? (int)(DateTime.Now - currentTicket.CheckInTime).TotalMinutes
+                    : (int?)null;
+
+                return new EmployeeSlotDetailDto
+                {
+                    SlotId = slot.SlotId,
+                    VehicleType = slot.VehicleType,
+                    Location = slot.Location,
+                    Status = slot.Status,
+                    IsOccupied = currentTicket != null,
+                    CurrentVehiclePlate = currentTicket?.VehiclePlate,
+                    CurrentCustomerName = currentTicket?.Customer?.FullName,
+                    OccupiedSince = currentTicket?.CheckInTime,
+                    CurrentOccupancyMinutes = occupancyMinutes,
+                    UsageThisMonth = usageThisMonth,
+                    UsageThisWeek = usageThisWeek,
+                    LastUsedAt = lastUsed,
+                    AverageOccupancyTime = avgOccupancyTime
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi lấy chi tiết chỗ đỗ: {ex.Message}");
+            }
+        }
+    }
+}

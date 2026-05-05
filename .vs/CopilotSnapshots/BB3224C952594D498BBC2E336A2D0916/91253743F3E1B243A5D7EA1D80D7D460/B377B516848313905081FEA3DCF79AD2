@@ -1,0 +1,20 @@
+﻿using ParkingManagement.BLL.DTOs;
+
+namespace ParkingManagement.BLL.Services.Interfaces
+{
+    /// <summary>
+    /// Employee Parking Slot Management
+    /// </summary>
+    public interface IEmployeeSlotManagementService
+    {
+        /// <summary>
+        /// Lấy danh sách chỗ đỗ (filter, pagination)
+        /// </summary>
+        Task<ListEmployeeSlotDto> GetSlotsAsync(EmployeeSlotFilterDto filter);
+
+        /// <summary>
+        /// Lấy chi tiết chỗ đỗ
+        /// </summary>
+        Task<EmployeeSlotDetailDto> GetSlotDetailAsync(string slotId);
+    }
+}

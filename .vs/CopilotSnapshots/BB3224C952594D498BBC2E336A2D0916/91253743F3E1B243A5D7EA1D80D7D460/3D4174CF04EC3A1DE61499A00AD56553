@@ -1,0 +1,78 @@
+﻿using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+using ParkingManagement.DAL.Interfaces;
+
+namespace ParkingManagement.BLL.Services.Implementations
+{
+    public class ReportService : IReportService
+    {
+        private readonly IPaymentRepository _paymentRepo;
+        private readonly IMonthlyTicketRepository _monthlyRepo;
+        private readonly ITicketRepository _ticketRepo;
+
+        public ReportService(
+            IPaymentRepository paymentRepo,
+            IMonthlyTicketRepository monthlyRepo,
+            ITicketRepository ticketRepo)
+        {
+            _paymentRepo = paymentRepo;
+            _monthlyRepo = monthlyRepo;
+            _ticketRepo = ticketRepo;
+        }
+
+        public async Task<RevenueReportDto> GetRevenueReportAsync(DateTime from, DateTime to)
+        {
+            var payments = await _paymentRepo.GetByDateRangeAsync(from, to);
+
+            var singlePayments = payments.Where(p => p.TicketId != null).ToList();
+            var monthlyPayments = payments.Where(p => p.MonthlyTicketId != null).ToList();
+
+            var daily = payments
+                .GroupBy(p => p.PaymentTime.Date)
+                .Select(g => new DailyRevenueDto
+                {
+                    Date = g.Key,
+                    Revenue = g.Sum(p => p.Amount),
+                    TicketCount = g.Count()
+                })
+                .OrderBy(d => d.Date)
+                .ToList();
+
+            return new RevenueReportDto
+            {
+                From = from,
+                To = to,
+                TotalRevenue = payments.Sum(p => p.Amount),
+                TotalTickets = singlePayments.Count,
+                TotalMonthlyTickets = monthlyPayments.Count,
+                RevenueFromSingleTickets = singlePayments.Sum(p => p.Amount),
+                RevenueFromMonthlyTickets = monthlyPayments.Sum(p => p.Amount),
+                DailyBreakdown = daily
+            };
+        }
+
+        public async Task<List<MonthlyTicketDto>> GetExpiringSoonAsync(int days = 7)
+        {
+            var list = await _monthlyRepo.GetExpiringSoonAsync(days);
+            return list.Select(m => new MonthlyTicketDto
+            {
+                MonthlyTicketId = m.MonthlyTicketId,
+                CustomerName = m.Customer?.FullName ?? "",
+                VehiclePlate = m.VehiclePlate,
+                VehicleType = m.VehicleType,
+                PackageType = m.PackageType,
+                StartDate = m.StartDate,
+                EndDate = m.EndDate,
+                TotalFee = m.TotalFee,
+                Status = m.Status,
+                DaysRemaining = Math.Max(0, (int)(m.EndDate - DateTime.Today).TotalDays)
+            }).ToList();
+        }
+
+        public async Task<int> CountActiveVehiclesAsync()
+        {
+            var tickets = await _ticketRepo.GetActiveTicketsAsync();
+            return tickets.Count;
+        }
+    }
+}

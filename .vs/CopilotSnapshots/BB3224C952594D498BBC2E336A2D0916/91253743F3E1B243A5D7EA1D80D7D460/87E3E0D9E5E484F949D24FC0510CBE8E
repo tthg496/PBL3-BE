@@ -1,0 +1,288 @@
+﻿using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services.Interfaces;
+using ParkingManagement.DAL.Interfaces;
+
+namespace ParkingManagement.BLL.Services.Implementations
+{
+    /// <summary>
+    /// Employee Report & Statistics Service
+    /// </summary>
+    public class EmployeeReportService : IEmployeeReportService
+    {
+        private readonly ITicketRepository _ticketRepository;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly IEmployeeRepository _employeeRepository;
+
+        public EmployeeReportService(
+            ITicketRepository ticketRepository,
+            IPaymentRepository paymentRepository,
+            IEmployeeRepository employeeRepository)
+        {
+            _ticketRepository = ticketRepository;
+            _paymentRepository = paymentRepository;
+            _employeeRepository = employeeRepository;
+        }
+
+        /// <summary>
+        /// Lấy dashboard cá nhân
+        /// </summary>
+        public async Task<EmployeeDashboardDto> GetDashboardAsync(string employeeId)
+        {
+            try
+            {
+                var employee = await _employeeRepository.GetByIdAsync(employeeId);
+                if (employee == null)
+                    throw new Exception("Nhân viên không tồn tại");
+
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var allPayments = (await _paymentRepository.GetAllAsync()).ToList();
+
+                var today = DateTime.Now.Date;
+                var thisWeekStart = today.AddDays(-(int)today.DayOfWeek);
+                var thisMonthStart = new DateTime(today.Year, today.Month, 1);
+
+                // Today
+                var ticketsToday = allTickets.Count(t => t.CheckInTime.Date == today);
+                var revenueToday = allPayments
+                    .Where(p => p.PaymentTime.Date == today && p.Status == "Thành công")
+                    .Sum(p => p.Amount);
+
+                var workMinutesToday = allTickets
+                    .Where(t => t.CheckInTime.Date == today && t.CheckOutTime.HasValue)
+                    .Sum(t => (int)(t.CheckOutTime.Value - t.CheckInTime).TotalMinutes);
+
+                // This Week
+                var ticketsThisWeek = allTickets.Count(t => t.CheckInTime.Date >= thisWeekStart && t.CheckInTime.Date <= today);
+                var revenueThisWeek = allPayments
+                    .Where(p => p.PaymentTime.Date >= thisWeekStart && p.PaymentTime.Date <= today && p.Status == "Thành công")
+                    .Sum(p => p.Amount);
+
+                var workMinutesThisWeek = allTickets
+                    .Where(t => t.CheckInTime.Date >= thisWeekStart && t.CheckInTime.Date <= today && t.CheckOutTime.HasValue)
+                    .Sum(t => (int)(t.CheckOutTime.Value - t.CheckInTime).TotalMinutes);
+
+                var workDaysThisWeek = allTickets
+                    .Where(t => t.CheckInTime.Date >= thisWeekStart && t.CheckInTime.Date <= today)
+                    .Select(t => t.CheckInTime.Date)
+                    .Distinct()
+                    .Count();
+
+                // This Month
+                var ticketsThisMonth = allTickets.Count(t => t.CheckInTime >= thisMonthStart && t.CheckInTime <= today);
+                var revenueThisMonth = allPayments
+                    .Where(p => p.PaymentTime >= thisMonthStart && p.PaymentTime <= today && p.Status == "Thành công")
+                    .Sum(p => p.Amount);
+
+                var workMinutesThisMonth = allTickets
+                    .Where(t => t.CheckInTime >= thisMonthStart && t.CheckInTime <= today && t.CheckOutTime.HasValue)
+                    .Sum(t => (int)(t.CheckOutTime.Value - t.CheckInTime).TotalMinutes);
+
+                var workDaysThisMonth = allTickets
+                    .Where(t => t.CheckInTime >= thisMonthStart && t.CheckInTime <= today)
+                    .Select(t => t.CheckInTime.Date)
+                    .Distinct()
+                    .Count();
+
+                // Overall
+                var avgRevenuePerTicket = ticketsThisMonth > 0 ? revenueThisMonth / ticketsThisMonth : 0;
+                var avgTicketsPerDay = workDaysThisMonth > 0 ? (double)ticketsThisMonth / workDaysThisMonth : 0;
+
+                return new EmployeeDashboardDto
+                {
+                    TicketsProcessedToday = ticketsToday,
+                    RevenueToday = revenueToday,
+                    WorkMinutesToday = workMinutesToday,
+                    TicketsProcessedThisWeek = ticketsThisWeek,
+                    RevenueThisWeek = revenueThisWeek,
+                    WorkMinutesThisWeek = workMinutesThisWeek,
+                    WorkDaysThisWeek = workDaysThisWeek,
+                    TicketsProcessedThisMonth = ticketsThisMonth,
+                    RevenueThisMonth = revenueThisMonth,
+                    WorkMinutesThisMonth = workMinutesThisMonth,
+                    WorkDaysThisMonth = workDaysThisMonth,
+                    AverageRevenuePerTicket = avgRevenuePerTicket,
+                    AverageTicketsPerDay = avgTicketsPerDay,
+                    CurrentShift = employee.Shift ?? "Không xác định"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new EmployeeDashboardDto();
+            }
+        }
+
+        /// <summary>
+        /// Lấy báo cáo điểm danh ca làm
+        /// </summary>
+        public async Task<ShiftAttendanceReportDto> GetShiftAttendanceReportAsync(string employeeId, DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            try
+            {
+                var from = fromDate?.Date ?? DateTime.Now.AddMonths(-1).Date;
+                var to = toDate?.Date ?? DateTime.Now.Date;
+
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var ticketsInRange = allTickets
+                    .Where(t => t.CheckInTime.Date >= from && t.CheckInTime.Date <= to)
+                    .ToList();
+
+                // Group by date to get daily stats
+                var dailyStats = ticketsInRange
+                    .GroupBy(t => t.CheckInTime.Date)
+                    .OrderBy(g => g.Key)
+                    .Select(g =>
+                    {
+                        var dayTickets = g.ToList();
+                        var workMinutes = dayTickets
+                            .Where(t => t.CheckOutTime.HasValue)
+                            .Sum(t => (int)(t.CheckOutTime.Value - t.CheckInTime).TotalMinutes);
+
+                        var shiftRevenue = dayTickets.Sum(t => t.Fee);
+
+                        return new ShiftAttendanceDetailDto
+                        {
+                            Date = g.Key,
+                            Shift = "Không xác định",  // TODO: Get from audit log or shift schedule
+                            CheckInTime = dayTickets.Min(t => t.CheckInTime),
+                            CheckOutTime = dayTickets.Max(t => (DateTime?)(t.CheckOutTime ?? t.CheckInTime)),
+                            WorkMinutes = workMinutes,
+                            Status = "Đúng giờ",  // TODO: Compare with expected shift time
+                            TicketsProcessed = dayTickets.Count,
+                            ShiftRevenue = shiftRevenue
+                        };
+                    })
+                    .ToList();
+
+                // Calculate summary
+                var totalWorkDays = dailyStats.Count;
+                var totalWorkMinutes = dailyStats.Sum(d => d.WorkMinutes ?? 0);
+                var avgWorkMinutesPerDay = totalWorkDays > 0 ? totalWorkMinutes / totalWorkDays : 0;
+
+                // By shift
+                var workDaysByShift = dailyStats
+                    .GroupBy(d => d.Shift)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                var workMinutesByShift = dailyStats
+                    .GroupBy(d => d.Shift)
+                    .ToDictionary(g => g.Key, g => g.Sum(d => d.WorkMinutes ?? 0));
+
+                return new ShiftAttendanceReportDto
+                {
+                    Details = dailyStats,
+                    TotalWorkDays = totalWorkDays,
+                    PunctualDays = dailyStats.Count(d => d.Status == "Đúng giờ"),
+                    LateDays = dailyStats.Count(d => d.Status == "Muộn"),
+                    AbsentDays = dailyStats.Count(d => d.Status == "Nghỉ"),
+                    TotalWorkMinutes = totalWorkMinutes,
+                    AverageWorkMinutesPerDay = avgWorkMinutesPerDay,
+                    WorkDaysByShift = workDaysByShift,
+                    WorkMinutesByShift = workMinutesByShift
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ShiftAttendanceReportDto();
+            }
+        }
+
+        /// <summary>
+        /// Lấy báo cáo doanh thu
+        /// </summary>
+        public async Task<EmployeeRevenueReportDto> GetRevenueReportAsync(string employeeId, string period = "month")
+        {
+            try
+            {
+                var today = DateTime.Now.Date;
+                DateTime from;
+
+                // Determine period
+                if (period == "day")
+                    from = today;
+                else if (period == "week")
+                    from = today.AddDays(-(int)today.DayOfWeek);
+                else  // month
+                    from = new DateTime(today.Year, today.Month, 1);
+
+                var to = today;
+
+                var allTickets = (await _ticketRepository.GetAllAsync()).ToList();
+                var allPayments = (await _paymentRepository.GetAllAsync()).ToList();
+
+                // Current period
+                var ticketsInPeriod = allTickets
+                    .Where(t => t.CheckInTime.Date >= from && t.CheckInTime.Date <= to)
+                    .ToList();
+
+                var paymentsInPeriod = allPayments
+                    .Where(p => p.PaymentTime.Date >= from && p.PaymentTime.Date <= to && p.Status == "Thành công")
+                    .ToList();
+
+                var totalRevenue = paymentsInPeriod.Sum(p => p.Amount);
+                var totalTickets = ticketsInPeriod.Count;
+                var avgRevenuePerTicket = totalTickets > 0 ? totalRevenue / totalTickets : 0;
+
+                // By vehicle type
+                var ticketsByVehicle = ticketsInPeriod
+                    .GroupBy(t => t.VehicleType)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                var revenueByVehicle = new Dictionary<string, decimal>();
+                foreach (var vehicleType in ticketsByVehicle.Keys)
+                {
+                    var revenue = ticketsInPeriod
+                        .Where(t => t.VehicleType == vehicleType)
+                        .Sum(t => t.Fee);
+                    revenueByVehicle[vehicleType] = revenue;
+                }
+
+                // Daily breakdown
+                var dailyBreakdown = ticketsInPeriod
+                    .GroupBy(t => t.CheckInTime.Date)
+                    .OrderBy(g => g.Key)
+                    .Select(g => new DailyRevenueDetailDto
+                    {
+                        Date = g.Key,
+                        TicketCount = g.Count(),
+                        TotalRevenue = g.Sum(t => t.Fee),
+                        AverageRevenuePerTicket = g.Count() > 0 ? g.Sum(t => t.Fee) / g.Count() : 0
+                    })
+                    .ToList();
+
+                // Previous period
+                var prevFrom = period == "day" ? from.AddDays(-1)
+                             : period == "week" ? from.AddDays(-7)
+                             : new DateTime(from.Year, from.Month, 1).AddMonths(-1);
+                var prevTickets = allTickets.Where(t => t.CheckInTime.Date >= prevFrom && t.CheckInTime.Date < from).ToList();
+                var prevPayments = allPayments.Where(p => p.PaymentTime.Date >= prevFrom && p.PaymentTime.Date < from && p.Status == "Thành công").ToList();
+                var prevRevenue = prevPayments.Sum(p => p.Amount);
+
+                var revenueChange = prevRevenue > 0 ? ((totalRevenue - prevRevenue) / prevRevenue) * 100 : 0;
+                var trend = revenueChange > 5 ? "↑ Tăng" : revenueChange < -5 ? "↓ Giảm" : "→ Ổn định";
+
+                // Top days
+                var topDays = dailyBreakdown.OrderByDescending(d => d.TotalRevenue).Take(5).ToList();
+
+                return new EmployeeRevenueReportDto
+                {
+                    PeriodStart = from,
+                    PeriodEnd = to,
+                    TotalRevenue = totalRevenue,
+                    TotalTickets = totalTickets,
+                    AverageRevenuePerTicket = avgRevenuePerTicket,
+                    TicketsByVehicleType = ticketsByVehicle,
+                    RevenueByVehicleType = revenueByVehicle,
+                    DailyBreakdown = dailyBreakdown,
+                    PreviousPeriodRevenue = prevRevenue,
+                    RevenueChangePercentage = (decimal)revenueChange,
+                    Trend = trend,
+                    TopDays = topDays
+                };
+            }
+            catch (Exception ex)
+            {
+                return new EmployeeRevenueReportDto();
+            }
+        }
+    }
+}
