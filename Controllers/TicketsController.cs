@@ -1,113 +1,145 @@
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ParkingManagement.BLL.DTOs;
 using ParkingManagement.BLL.Services.Interfaces;
 
-namespace ParkingManagement.Web.Controllers
+namespace ParkingManagement.Web.Controllers.Api
 {
-    [Route("api/[controller]")]
+    /// <summary>
+    /// API for Ticket Management
+    /// Handles check-in, check-out, and ticket history
+    /// </summary>
     [ApiController]
+    [Route("api/tickets")]
+    [Authorize]
+    [Produces("application/json")]
     public class TicketsController : ControllerBase
     {
         private readonly ITicketService _ticketService;
+        private readonly ILogger<TicketsController> _logger;
 
-        public TicketsController(ITicketService ticketService)
+        public TicketsController(
+            ITicketService ticketService,
+            ILogger<TicketsController> logger)
         {
             _ticketService = ticketService;
+            _logger = logger;
         }
 
-        // ── 1. General (Employee & Manager) ──
-
+        /// <summary>
+        /// Get all tickets with filtering and pagination
+        /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetTickets([FromQuery] TicketFilterDto filter)
-        {
-            var result = await _ticketService.GetTicketsAsync(filter);
-            return Ok(result);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetTicketDetail(string id)
+        [ProducesResponseType(typeof(ListTicketDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll([FromQuery] TicketFilterDto filter)
         {
             try
             {
-                var result = await _ticketService.GetTicketDetailAsync(id);
+                var result = await _ticketService.GetTicketsAsync(filter);
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                _logger.LogError($"GetAll error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
+        /// <summary>
+        /// Get ticket detail by ID
+        /// </summary>
+        [HttpGet("{ticketId}")]
+        [ProducesResponseType(typeof(TicketDetailDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById(string ticketId)
+        {
+            try
+            {
+                var ticket = await _ticketService.GetTicketDetailAsync(ticketId);
+                if (ticket == null)
+                    return NotFound(new { message = "Khong tim thay ve" });
+
+                return Ok(ticket);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"GetById error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        /// <summary>
+        /// Check-in vehicle (Employee only)
+        /// </summary>
+        [HttpPost("checkin")]
+        [Authorize(Roles = "Employee")]
+        [ProducesResponseType(typeof(CheckInResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CheckIn([FromBody] ConfirmCheckInDto input)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var result = await _ticketService.ConfirmCheckInAsync(input);
+                if (!result.Success)
+                    return BadRequest(result);
+
+                _logger.LogInformation($"Vehicle checked in: {input.VehiclePlate}");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"CheckIn error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        /// <summary>
+        /// Check-out vehicle and process payment (Employee only)
+        /// </summary>
+        [HttpPost("{ticketId}/checkout")]
+        [Authorize(Roles = "Employee")]
+        [ProducesResponseType(typeof(CheckOutResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CheckOut(string ticketId, [FromBody] ConfirmCheckOutDto input)
+        {
+            try
+            {
+                input.TicketId = ticketId;
+                var result = await _ticketService.ConfirmCheckOutAsync(input);
+                if (!result.Success)
+                    return BadRequest(result);
+
+                _logger.LogInformation($"Vehicle checked out: {ticketId}");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"CheckOut error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        /// <summary>
+        /// Search tickets (Employee only)
+        /// </summary>
         [HttpGet("search")]
-        public async Task<IActionResult> SearchTickets([FromQuery] EmployeeTicketSearchDto search)
-        {
-            var result = await _ticketService.SearchTicketsAsync(search);
-            return Ok(result);
-        }
-
-        // ── 2. Customer Specific ──
-
-        [HttpGet("customer/{customerId}")]
-        public async Task<IActionResult> GetCustomerTickets(string customerId, [FromQuery] CustomerTicketFilterDto filter)
-        {
-            var result = await _ticketService.GetMyTicketsAsync(customerId, filter);
-            return Ok(result);
-        }
-
-        [HttpGet("customer/{customerId}/detail/{ticketId}")]
-        public async Task<IActionResult> GetCustomerTicketDetail(string customerId, string ticketId)
+        [Authorize(Roles = "Employee")]
+        [ProducesResponseType(typeof(ListEmployeeTicketDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Search([FromQuery] EmployeeTicketSearchDto search)
         {
             try
             {
-                var result = await _ticketService.GetCustomerTicketDetailAsync(customerId, ticketId);
+                var result = await _ticketService.SearchTicketsAsync(search);
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError($"Search error: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error" });
             }
-        }
-
-        [HttpGet("customer/{customerId}/payments")]
-        public async Task<IActionResult> GetCustomerPayments(string customerId, [FromQuery] CustomerPaymentFilterDto filter)
-        {
-            var result = await _ticketService.GetPaymentHistoryAsync(customerId, filter);
-            return Ok(result);
-        }
-
-        // ── 3. Check-in ──
-
-        [HttpPost("checkin/validate")]
-        public async Task<IActionResult> ValidateCheckIn([FromBody] CheckInInputDto input)
-        {
-            var result = await _ticketService.ValidateAndPrepareCheckInAsync(input);
-            return Ok(result);
-        }
-
-        [HttpPost("checkin/confirm")]
-        public async Task<IActionResult> ConfirmCheckIn([FromBody] ConfirmCheckInDto input)
-        {
-            var result = await _ticketService.ConfirmCheckInAsync(input);
-            if (!result.Success) return BadRequest(result);
-            return Ok(result);
-        }
-
-        // ── 4. Check-out ──
-
-        [HttpPost("checkout/validate")]
-        public async Task<IActionResult> ValidateCheckOut([FromBody] CheckOutInputDto input)
-        {
-            var result = await _ticketService.ValidateAndPrepareCheckOutAsync(input);
-            if (!result.Success) return BadRequest(result);
-            return Ok(result);
-        }
-
-        [HttpPost("checkout/confirm")]
-        public async Task<IActionResult> ConfirmCheckOut([FromBody] ConfirmCheckOutDto input)
-        {
-            var result = await _ticketService.ConfirmCheckOutAsync(input);
-            if (!result.Success) return BadRequest(result);
-            return Ok(result);
         }
     }
 }

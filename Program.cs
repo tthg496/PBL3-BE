@@ -1,5 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using ParkingManagement.BLL.DTOs;
+using ParkingManagement.BLL.Services;
 using ParkingManagement.BLL.Services.Implementations;
 using ParkingManagement.BLL.Services.Interfaces;
 using ParkingManagement.DAL.Data;
@@ -11,14 +15,41 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// VertifyOTP
+// ── JWT Configuration ────────────────────────────
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT:SecretKey not configured");
+var key = Encoding.ASCII.GetBytes(secretKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings["Issuer"] ?? "ParkingManagement",
+        ValidateAudience = true,
+        ValidAudience = jwtSettings["Audience"] ?? "ParkingManagementUser",
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
+
+// ── Email Service ────────────────────────────
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddTransient<IEmailService, EmailService>();
 
-// Add all services (DbContext, Repositories, Services)
-// ✅ Chỉ dùng AddApplicationServices — đã đăng ký AppDbContext bên trong rồi
+// ── Application Services ────────────────────────────
 builder.Services.AddApplicationServices(builder.Configuration);
 
+// ── CORS ────────────────────────────
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -31,7 +62,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Controllers + Session
+// ── Controllers + Session ────────────────────────────
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession(opt =>
 {
@@ -87,6 +118,9 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("Frontend");
 app.UseSession();
+
+// ── Authentication & Authorization Middleware ────────────────────────────
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

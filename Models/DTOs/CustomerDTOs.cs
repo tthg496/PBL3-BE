@@ -65,13 +65,6 @@ namespace ParkingManagement.BLL.DTOs
         public string? Gender { get; set; }
     }
 
-    public class ChangePasswordDto
-    {
-        public string CurrentPassword { get; set; } = null!;
-        public string NewPassword { get; set; } = null!;
-        public string ConfirmPassword { get; set; } = null!;
-    }
-
     public class CustomerProfileDto
     {
         public string CustomerId { get; set; } = null!;
@@ -169,6 +162,8 @@ namespace ParkingManagement.BLL.DTOs
         public string FullName { get; set; } = null!;
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
+        public string? Gender { get; set; }
+        public DateTime CreatedAt { get; set; }
         public bool IsDeleted { get; set; }
         public List<string> VehiclePlates { get; set; } = new();
     }

@@ -251,6 +251,7 @@ D:\1.university\ky 4\.Net\project\BackendAPI\bin\Debug\net10.0\BCrypt.Net-Next.d
 D:\1.university\ky 4\.Net\project\BackendAPI\bin\Debug\net10.0\BouncyCastle.Cryptography.dll
 D:\1.university\ky 4\.Net\project\BackendAPI\bin\Debug\net10.0\Humanizer.dll
 D:\1.university\ky 4\.Net\project\BackendAPI\bin\Debug\net10.0\MailKit.dll
+D:\1.university\ky 4\.Net\project\BackendAPI\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 D:\1.university\ky 4\.Net\project\BackendAPI\bin\Debug\net10.0\Microsoft.Bcl.AsyncInterfaces.dll
 D:\1.university\ky 4\.Net\project\BackendAPI\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
 D:\1.university\ky 4\.Net\project\BackendAPI\bin\Debug\net10.0\Microsoft.Build.Framework.dll
@@ -386,6 +387,7 @@ D:\1.university\ky 4\.Net\project\BackendAPI\obj\Debug\net10.0\BackendAPI.Assemb
 D:\1.university\ky 4\.Net\project\BackendAPI\obj\Debug\net10.0\BackendAPI.csproj.CoreCompileInputs.cache
 D:\1.university\ky 4\.Net\project\BackendAPI\obj\Debug\net10.0\BackendAPI.MvcApplicationPartsAssemblyInfo.cs
 D:\1.university\ky 4\.Net\project\BackendAPI\obj\Debug\net10.0\BackendAPI.MvcApplicationPartsAssemblyInfo.cache
+D:\1.university\ky 4\.Net\project\BackendAPI\obj\Debug\net10.0\BackendAPI.sourcelink.json
 D:\1.university\ky 4\.Net\project\BackendAPI\obj\Debug\net10.0\rjimswa.dswa.cache.json
 D:\1.university\ky 4\.Net\project\BackendAPI\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 D:\1.university\ky 4\.Net\project\BackendAPI\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json

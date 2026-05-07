@@ -2,15 +2,15 @@
   "ExpandedNodes": [
     "",
     "\\Data",
-    "\\Exceptions",
     "\\Models",
     "\\Models\\DTOs",
     "\\Models\\Entities",
     "\\Models\\Entities\\LegacyParking",
     "\\Models\\Requests",
     "\\Models\\Responses",
-    "\\Properties"
+    "\\Properties",
+    "\\Services"
   ],
-  "SelectedNode": "\\Models\\Responses",
+  "SelectedNode": "\\Program.cs",
   "PreviewInSolutionExplorer": false
 }

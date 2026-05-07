@@ -1,15 +1,6 @@
 namespace ParkingManagement.BLL.DTOs
 {
-    // ── Monthly Ticket DTOs ───────────────────────────────────
-    public class RegisterMonthlyTicketDto
-    {
-        public string CustomerId { get; set; } = null!;
-        public string VehiclePlate { get; set; } = null!;
-        public string VehicleType { get; set; } = null!;
-        public string PackageType { get; set; } = null!;   // 1 tháng / 3 tháng / 6 tháng
-        public string PaymentMethod { get; set; } = "Tiền mặt";
-    }
-
+    // ── Old DTOs - kept for backward compatibility ────────────────
     public class MonthlyTicketDto
     {
         public string MonthlyTicketId { get; set; } = null!;
@@ -22,16 +13,6 @@ namespace ParkingManagement.BLL.DTOs
         public decimal TotalFee { get; set; }
         public string Status { get; set; } = null!;
         public int DaysRemaining { get; set; }
-    }
-
-    // ── Reservation DTOs ──────────────────────────────────────
-    public class CreateReservationDto
-    {
-        public string CustomerId { get; set; } = null!;
-        public string VehiclePlate { get; set; } = null!;
-        public string VehicleType { get; set; } = null!;
-        public DateTime ExpectedTime { get; set; }
-        public string? PreferredSlotId { get; set; }
     }
 
     public class ReservationDto
@@ -128,31 +109,6 @@ namespace ParkingManagement.BLL.DTOs
         public int PageSize { get; set; }
         public int TotalItems { get; set; }
         public int TotalPages { get; set; }
-    }
-
-    /// <summary>
-    /// UC016.2 - Chi tiết vé
-    /// </summary>
-    public class TicketDetailDto
-    {
-        public string TicketId { get; set; } = null!;
-        public string VehiclePlate { get; set; } = null!;
-        public string VehicleType { get; set; } = null!;
-        public DateTime CheckInTime { get; set; }
-        public DateTime? CheckOutTime { get; set; }
-        public string Status { get; set; } = null!;
-        public decimal? Fee { get; set; }
-        public string? SlotId { get; set; }
-        public int? DurationMinutes { get; set; }     // Nếu đã check-out
-
-        // Customer info
-        public string? CustomerId { get; set; }
-        public string? CustomerName { get; set; }
-        public string? CustomerPhone { get; set; }
-
-        // Monthly ticket
-        public string? MonthlyTicketId { get; set; }
-        public bool HasActiveMonthlyTicket { get; set; }
     }
 
     /// <summary>
@@ -423,6 +379,8 @@ namespace ParkingManagement.BLL.DTOs
     public class CustomerPaymentFilterDto
     {
         public string? Status { get; set; }           // "Hoàn tất", "Chờ xác nhận", "Thất bại"
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }
@@ -495,15 +453,6 @@ namespace ParkingManagement.BLL.DTOs
         public int DaysRemaining { get; set; }
         public int TotalCheckInCount { get; set; }
         public string AvailableCheckIns { get; set; } = "Unlimited";
-    }
-
-    /// <summary>
-    /// UC-CUST02 - Gia hạn vé tháng
-    /// </summary>
-    public class RenewMonthlyTicketDto
-    {
-        public string MonthlyTicketId { get; set; } = null!;
-        public string PackageType { get; set; } = null!;       // "1 tháng", "3 tháng", "6 tháng"
     }
 
     /// <summary>

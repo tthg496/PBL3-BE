@@ -50,11 +50,11 @@ namespace ParkingManagement.Web.Extensions
             services.AddScoped<IParkingSlotStrategy, DefaultParkingSlotStrategy>();
 
             // 5. Services (BLL)
+            services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IParkingService, ParkingService>();
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IEmployeeService, EmployeeService>();
-            services.AddScoped<IEmployeeAccountService, EmployeeAccountService>();
             services.AddScoped<ITicketService, TicketService>();
             services.AddScoped<IMonthlyTicketService, MonthlyTicketService>();
             services.AddScoped<IReservationService, ReservationService>();

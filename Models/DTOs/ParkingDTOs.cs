@@ -37,20 +37,6 @@ namespace ParkingManagement.BLL.DTOs
         public int TicketCount { get; set; }
     }
 
-    // ── Service Result ────────────────────────────────────────
-    public class ServiceResult<T>
-    {
-        public bool Success { get; set; }
-        public string? Message { get; set; }
-        public T? Data { get; set; }
-
-        public static ServiceResult<T> Ok(T data, string? msg = null) =>
-            new() { Success = true, Data = data, Message = msg };
-
-        public static ServiceResult<T> Fail(string msg) =>
-            new() { Success = false, Message = msg };
-    }
-
     // ── Manager Dashboard DTOs ────────────────────────────────
     public class DashboardSummaryDto
     {

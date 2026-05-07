@@ -69,10 +69,11 @@ namespace ParkingManagement.BLL.DTOs
     /// </summary>
     public class ConfirmPaymentDto
     {
-        public string TicketId { get; set; } = null!;           // Mã vé
+        public string? TicketId { get; set; }                    // Mã vé
+        public string? MonthlyTicketId { get; set; }             // Mã vé tháng
         public string PaymentMethod { get; set; } = null!;      // Phương thức thanh toán
         public decimal Amount { get; set; }                     // Số tiền thanh toán
-        
+
         // Tùy phương thức
         public decimal? ReceivedAmount { get; set; }            // Tiền nhận (tiền mặt)
         public string? BankTransferRef { get; set; }            // Mã tham chiếu chuyển khoản
@@ -87,10 +88,12 @@ namespace ParkingManagement.BLL.DTOs
         public bool Success { get; set; }
         public string? PaymentId { get; set; }                  // Mã thanh toán
         public string? TicketId { get; set; }                   // Mã vé
+        public string? MonthlyTicketId { get; set; }            // Mã vé tháng
         public string PaymentMethod { get; set; } = null!;      // Phương thức
         public decimal Amount { get; set; }                     // Số tiền
         public DateTime PaymentTime { get; set; }               // Thời gian thanh toán
         public decimal? Change { get; set; }                    // Tiền thừa (nếu tiền mặt)
+        public string? PaymentStatus { get; set; }              // Trạng thái thanh toán
         public string? Message { get; set; }
     }
 }
