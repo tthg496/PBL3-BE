@@ -5,6 +5,7 @@ using ParkingManagement.DAL.Models;
 using ParkingManagement.DAL.Interfaces;
 using System.Text.RegularExpressions;
 using System.Net.Mail;
+using System.Security.Cryptography;
 
 namespace ParkingManagement.BLL.Services.Implementations
 {
@@ -14,6 +15,7 @@ namespace ParkingManagement.BLL.Services.Implementations
         private readonly ICustomerRepository _customerRepo;
         private readonly IEmployeeRepository _employeeRepo;
         private readonly IManagerRepository _managerRepo;
+        private readonly IOtpRepository _otpRepo;
         private readonly IEmailService _emailService;
         private readonly ILogger<AuthService> _logger;
 
@@ -22,6 +24,7 @@ namespace ParkingManagement.BLL.Services.Implementations
             ICustomerRepository customerRepo,
             IEmployeeRepository employeeRepo,
             IManagerRepository managerRepo,
+            IOtpRepository otpRepo,
             IEmailService emailService,
             ILogger<AuthService> logger)
         {
@@ -29,6 +32,7 @@ namespace ParkingManagement.BLL.Services.Implementations
             _customerRepo = customerRepo;
             _employeeRepo = employeeRepo;
             _managerRepo = managerRepo;
+            _otpRepo = otpRepo;
             _emailService = emailService;
             _logger = logger;
         }
@@ -44,10 +48,16 @@ namespace ParkingManagement.BLL.Services.Implementations
                     return ServiceResult.Fail("Email và mật khẩu không được để trống.");
 
                 var account = await _accountRepo.GetByEmailAsync(dto.Email.Trim().ToLower());
-                if (account == null || !account.IsActive)
+                if (account == null)
                 {
                     _logger.LogWarning($"Login failed for email: {dto.Email}");
                     return ServiceResult.Fail("Email hoặc mật khẩu không đúng.");
+                }
+
+                if (!account.IsActive)
+                {
+                    _logger.LogWarning($"Inactive account login attempted for email: {dto.Email}");
+                    return ServiceResult.Fail("Tài khoản chưa được xác thực hoặc đã bị khóa.");
                 }
 
                 if (!BCrypt.Net.BCrypt.Verify(dto.Password, account.PasswordHash))
@@ -88,7 +98,7 @@ namespace ParkingManagement.BLL.Services.Implementations
         }
 
         /// <summary>
-        /// Register customer account
+        /// Register customer account. Account is inactive until OTP verification succeeds.
         /// </summary>
         public async Task<ServiceResult<string>> RegisterAsync(RegisterDto dto)
         {
@@ -133,7 +143,8 @@ namespace ParkingManagement.BLL.Services.Implementations
                 }
 
                 var email = dto.Email.Trim().ToLower();
-                if (await _accountRepo.ExistsEmailAsync(email))
+                var existingAccount = await _accountRepo.GetByEmailAsync(email);
+                if (existingAccount != null && existingAccount.IsActive)
                 {
                     return new ServiceResult<string>
                     {
@@ -142,38 +153,85 @@ namespace ParkingManagement.BLL.Services.Implementations
                     };
                 }
 
-                // Create account + customer
-                var accountId = $"ACC{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
-                var account = new Account
+                if (existingAccount != null && existingAccount.Role != "Customer")
                 {
-                    AccountId = accountId,
-                    Email = email,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12),
-                    Role = "Customer",
-                    CreatedAt = DateTime.Now,
-                    IsActive = true
-                };
+                    return new ServiceResult<string>
+                    {
+                        Success = false,
+                        Message = "Email này đang thuộc tài khoản khác trong hệ thống."
+                    };
+                }
 
-                await _accountRepo.AddAsync(account);
+                Account account;
+                Customer? customer;
 
-                var customerId = $"CUS{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
-                var customer = new Customer
+                if (existingAccount == null)
                 {
-                    CustomerId = customerId,
-                    AccountId = accountId,
-                    FullName = dto.FullName.Trim(),
-                    PhoneNumber = dto.PhoneNumber.Trim(),
-                    IsDeleted = false
-                };
+                    var accountId = $"ACC{Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()}";
+                    account = new Account
+                    {
+                        AccountId = accountId,
+                        Email = email,
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12),
+                        Role = "Customer",
+                        CreatedAt = DateTime.Now,
+                        IsActive = false,
+                        RequirePasswordChange = false
+                    };
 
-                await _customerRepo.AddAsync(customer);
+                    await _accountRepo.AddAsync(account);
 
-                _logger.LogInformation($"Customer registered: {email}");
+                    customer = new Customer
+                    {
+                        CustomerId = $"CUS{Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()}",
+                        AccountId = account.AccountId,
+                        FullName = dto.FullName.Trim(),
+                        PhoneNumber = dto.PhoneNumber.Trim(),
+                        IsDeleted = false
+                    };
+
+                    await _customerRepo.AddAsync(customer);
+                }
+                else
+                {
+                    account = existingAccount;
+                    account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12);
+                    account.IsActive = false;
+                    account.RequirePasswordChange = false;
+                    await _accountRepo.UpdateAsync(account);
+
+                    customer = await _customerRepo.GetByAccountIdAsync(account.AccountId);
+                    if (customer == null)
+                    {
+                        customer = new Customer
+                        {
+                            CustomerId = $"CUS{Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()}",
+                            AccountId = account.AccountId,
+                            FullName = dto.FullName.Trim(),
+                            PhoneNumber = dto.PhoneNumber.Trim(),
+                            IsDeleted = false
+                        };
+
+                        await _customerRepo.AddAsync(customer);
+                    }
+                    else
+                    {
+                        customer.FullName = dto.FullName.Trim();
+                        customer.PhoneNumber = dto.PhoneNumber.Trim();
+                        customer.IsDeleted = false;
+                        await _customerRepo.UpdateAsync(customer);
+                    }
+                }
+
+                var otpCode = await CreateRegistrationOtpAsync(email);
+                await _emailService.SendOtpEmailAsync(email, dto.FullName.Trim(), otpCode);
+
+                _logger.LogInformation($"Registration OTP sent for customer: {email}");
                 return new ServiceResult<string>
                 {
                     Success = true,
-                    Message = "Đăng ký thành công. Vui lòng đăng nhập.",
-                    Data = customerId
+                    Message = "Mã OTP xác thực đã được gửi đến email của bạn.",
+                    Data = email
                 };
             }
             catch (Exception ex)
@@ -184,6 +242,48 @@ namespace ParkingManagement.BLL.Services.Implementations
                     Success = false,
                     Message = "Lỗi hệ thống. Vui lòng thử lại."
                 };
+            }
+        }
+
+        /// <summary>
+        /// Verify customer registration OTP and activate the pending account.
+        /// </summary>
+        public async Task<ServiceResult<string>> VerifyOtpAsync(VerifyOtpDto dto)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Otp))
+                    return ServiceResult<string>.Fail("Email và OTP không được để trống.");
+
+                var email = dto.Email.Trim().ToLower();
+                var code = dto.Otp.Trim();
+
+                var otp = await _otpRepo.GetLatestByEmailAsync(email);
+                if (otp == null || otp.Code != code)
+                    return ServiceResult<string>.Fail("OTP không hợp lệ hoặc đã hết hạn.");
+
+                var account = await _accountRepo.GetByEmailAsync(email);
+                if (account == null || account.Role != "Customer")
+                    return ServiceResult<string>.Fail("Không tìm thấy đăng ký chờ xác thực.");
+
+                var customer = await _customerRepo.GetByAccountIdAsync(account.AccountId);
+                if (customer == null)
+                    return ServiceResult<string>.Fail("Không tìm thấy hồ sơ khách hàng chờ xác thực.");
+
+                account.IsActive = true;
+                await _accountRepo.UpdateAsync(account);
+
+                otp.IsVerified = true;
+                otp.VerifiedAt = DateTime.UtcNow;
+                await _otpRepo.UpdateAsync(otp);
+
+                _logger.LogInformation($"Customer account verified by OTP: {email}");
+                return ServiceResult<string>.Ok(customer.CustomerId, "Xác thực email thành công. Tài khoản đã được kích hoạt.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"VerifyOtpAsync error: {ex.Message}");
+                return ServiceResult<string>.Fail("Lỗi hệ thống. Vui lòng thử lại.");
             }
         }
 
@@ -244,6 +344,33 @@ namespace ParkingManagement.BLL.Services.Implementations
             return true;
         }
 
+        private async Task<string> CreateRegistrationOtpAsync(string email)
+        {
+            await _otpRepo.DeleteExpiredAsync();
+
+            Otp? previousOtp;
+            while ((previousOtp = await _otpRepo.GetLatestByEmailAsync(email)) != null)
+            {
+                previousOtp.IsVerified = true;
+                previousOtp.VerifiedAt = DateTime.UtcNow;
+                await _otpRepo.UpdateAsync(previousOtp);
+            }
+
+            var otpCode = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+            var otp = new Otp
+            {
+                OtpId = await _otpRepo.GenerateIdAsync(),
+                Email = email,
+                Code = otpCode,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(5),
+                IsVerified = false
+            };
+
+            await _otpRepo.AddAsync(otp);
+            return otpCode;
+        }
+
         // Original methods for compatibility
         public async Task<LoginResultDto> LoginAsync_Legacy(LoginDto dto)
         {
@@ -266,7 +393,7 @@ namespace ParkingManagement.BLL.Services.Implementations
             {
                 Success = result.Success,
                 Message = result.Message,
-                CustomerId = result.Data
+                Email = result.Data
             };
         }
     }

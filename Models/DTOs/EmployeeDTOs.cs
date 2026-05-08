@@ -6,9 +6,6 @@ namespace ParkingManagement.BLL.DTOs
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;
         public string? PhoneNumber { get; set; }
-        public string? Shift { get; set; }
-        public bool IsManager { get; set; } = false;
-        public string? Department { get; set; }
     }
 
     public class EmployeeDto

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ParkingManagement.BLL.DTOs;
 using ParkingManagement.BLL.Services.Interfaces;
@@ -62,6 +63,7 @@ namespace ParkingManagement.Web.Controllers.Api
         /// Create new employee
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Manager")]
         [ProducesResponseType(typeof(ServiceResult<string>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ServiceResult<string>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateEmployeeDto dto)

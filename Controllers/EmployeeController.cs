@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ParkingManagement.DAL.Models;
 using ParkingManagement.DAL.Data;
@@ -67,6 +68,7 @@ namespace ParkingManagement.Web.Controllers.Admin
         // POST: /admin/employee/create
         [HttpPost]
         [Route("create")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Create([FromBody] EmployeeCreateModel model)
         {
             try
@@ -100,7 +102,7 @@ namespace ParkingManagement.Web.Controllers.Admin
                     AccountId = account.AccountId,
                     FullName = model.FullName,
                     PhoneNumber = model.Phone,
-                    Shift = "Sáng", // default or mapped from model
+                    Shift = null,
                     IsDeleted = false
                 };
 
@@ -277,9 +279,6 @@ namespace ParkingManagement.Web.Controllers.Admin
         public string Password { get; set; } = null!;
         public string FullName { get; set; } = null!;
         public string? Phone { get; set; }
-        public DateTime HireDate { get; set; }
-        public string ShiftStart { get; set; } = "08:00";
-        public string ShiftEnd { get; set; } = "17:00";
     }
 
     public class EmployeeUpdateModel

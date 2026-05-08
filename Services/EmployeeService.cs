@@ -55,14 +55,13 @@ namespace ParkingManagement.BLL.Services.Implementations
             if (await _accountRepo.ExistsEmailAsync(email))
                 return ServiceResult<string>.Fail("Email này đã tồn tại.");
 
-            var role = dto.IsManager ? "Manager" : "Employee";
             var accountId = $"ACC{DateTime.Now.Ticks % 100000:D6}";
             var account = new Account
             {
                 AccountId = accountId,
                 Email = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12),
-                Role = role,
+                Role = "Employee",
                 CreatedAt = DateTime.Now,
                 IsActive = true
             };
@@ -72,10 +71,11 @@ namespace ParkingManagement.BLL.Services.Implementations
             var employee = new DAL.Models.Employee
             {
                 EmployeeId = employeeId,
+                EmployeeCode = $"EMP{DateTime.Now.Ticks % 100000:D5}",
                 AccountId = accountId,
                 FullName = dto.FullName.Trim(),
                 PhoneNumber = dto.PhoneNumber,
-                Shift = dto.Shift,
+                Shift = null,
                 IsDeleted = false
             };
             await _repo.AddAsync(employee);
