@@ -8,7 +8,7 @@ using ParkingManagement.DAL.Data;
 
 #nullable disable
 
-namespace ParkingManagement.DAL.Migrations
+namespace BackendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -32,6 +32,7 @@ namespace ParkingManagement.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -51,18 +52,9 @@ namespace ParkingManagement.DAL.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.HasKey("AccountId");
 
                     b.HasIndex("Email")
-                        .IsUnique()
-                        .HasFilter("[Email] IS NOT NULL");
-
-                    b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("Accounts");
@@ -71,79 +63,92 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             AccountId = "ACC001",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "tung.ql@baixetranphu.vn",
+                            CreatedAt = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "th04092006@gmail.com",
                             IsActive = true,
-                            PasswordHash = "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMaJnFd1jC9s5sJq1bKx5HY4i6",
+                            PasswordHash = "$2a$12$kA4mFAV2vy8DBLtVX2pvMObG4nlikvEj9S4hGSLWE2JkignKN8uwS",
                             RequirePasswordChange = false,
-                            Role = "Manager",
-                            Username = "nguyen.thanh.tung"
+                            Role = "Manager"
                         },
                         new
                         {
                             AccountId = "ACC002",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "mai.nv@baixetranphu.vn",
+                            CreatedAt = new DateTime(2026, 1, 5, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "thanh76555765@gmail.com",
                             IsActive = true,
-                            PasswordHash = "$2a$12$XpV8cBnqRT5HaK2dLM7OiuZqY1P4sNwFhG9rU3vKj6mE0eXcQl8n2",
+                            PasswordHash = "$2a$12$jmcPkhIubiP8SaSOemPnSO8gzj6CH3KJRGXKyGdymfPdcHx.lRL1.",
                             RequirePasswordChange = false,
-                            Role = "Employee",
-                            Username = "tran.thi.mai"
+                            Role = "Employee"
                         },
                         new
                         {
                             AccountId = "ACC003",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "hung.nv@baixetranphu.vn",
+                            CreatedAt = new DateTime(2026, 1, 8, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "staff.hung@gmail.com",
                             IsActive = true,
-                            PasswordHash = "$2a$12$XpV8cBnqRT5HaK2dLM7OiuZqY1P4sNwFhG9rU3vKj6mE0eXcQl8n2",
+                            PasswordHash = "$2a$12$jmcPkhIubiP8SaSOemPnSO8gzj6CH3KJRGXKyGdymfPdcHx.lRL1.",
                             RequirePasswordChange = false,
-                            Role = "Employee",
-                            Username = "le.van.hung"
+                            Role = "Employee"
                         },
                         new
                         {
                             AccountId = "ACC004",
-                            CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "baopq@gmail.com",
-                            IsActive = true,
-                            PasswordHash = "$2a$12$9kM4pJ3wC8zN2vR7xF5qEuY6tL0sG1hB4dI8nK3oS2aA7cW9mP1y0",
+                            CreatedAt = new DateTime(2026, 2, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "staff.disabled@gmail.com",
+                            IsActive = false,
+                            PasswordHash = "$2a$12$jmcPkhIubiP8SaSOemPnSO8gzj6CH3KJRGXKyGdymfPdcHx.lRL1.",
                             RequirePasswordChange = false,
-                            Role = "Customer",
-                            Username = "pham.quoc.bao"
+                            Role = "Employee"
                         },
                         new
                         {
                             AccountId = "ACC005",
-                            CreatedAt = new DateTime(2026, 2, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "lanhothuy@gmail.com",
+                            CreatedAt = new DateTime(2026, 1, 15, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "th04092006.customer@gmail.com",
                             IsActive = true,
-                            PasswordHash = "$2a$12$9kM4pJ3wC8zN2vR7xF5qEuY6tL0sG1hB4dI8nK3oS2aA7cW9mP1y0",
+                            PasswordHash = "$2a$12$jmcPkhIubiP8SaSOemPnSO8gzj6CH3KJRGXKyGdymfPdcHx.lRL1.",
                             RequirePasswordChange = false,
-                            Role = "Customer",
-                            Username = "ho.thi.lan"
+                            Role = "Customer"
                         },
                         new
                         {
                             AccountId = "ACC006",
-                            CreatedAt = new DateTime(2026, 2, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "khoaRacing2001@gmail.com",
+                            CreatedAt = new DateTime(2026, 2, 3, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "customer.lan@gmail.com",
                             IsActive = true,
-                            PasswordHash = "$2a$12$9kM4pJ3wC8zN2vR7xF5qEuY6tL0sG1hB4dI8nK3oS2aA7cW9mP1y0",
+                            PasswordHash = "$2a$12$jmcPkhIubiP8SaSOemPnSO8gzj6CH3KJRGXKyGdymfPdcHx.lRL1.",
                             RequirePasswordChange = false,
-                            Role = "Customer",
-                            Username = "dang.minh.khoa"
+                            Role = "Customer"
                         },
                         new
                         {
                             AccountId = "ACC007",
-                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "thuhuong.ntn@yahoo.com",
+                            CreatedAt = new DateTime(2026, 2, 20, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "customer.khoa@gmail.com",
                             IsActive = true,
-                            PasswordHash = "$2a$12$9kM4pJ3wC8zN2vR7xF5qEuY6tL0sG1hB4dI8nK3oS2aA7cW9mP1y0",
+                            PasswordHash = "$2a$12$jmcPkhIubiP8SaSOemPnSO8gzj6CH3KJRGXKyGdymfPdcHx.lRL1.",
                             RequirePasswordChange = false,
-                            Role = "Customer",
-                            Username = "nguyen.thu.huong"
+                            Role = "Customer"
+                        },
+                        new
+                        {
+                            AccountId = "ACC008",
+                            CreatedAt = new DateTime(2026, 3, 1, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "customer.huong@gmail.com",
+                            IsActive = true,
+                            PasswordHash = "$2a$12$jmcPkhIubiP8SaSOemPnSO8gzj6CH3KJRGXKyGdymfPdcHx.lRL1.",
+                            RequirePasswordChange = false,
+                            Role = "Customer"
+                        },
+                        new
+                        {
+                            AccountId = "ACC009",
+                            CreatedAt = new DateTime(2026, 3, 10, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "customer.minh@gmail.com",
+                            IsActive = true,
+                            PasswordHash = "$2a$12$jmcPkhIubiP8SaSOemPnSO8gzj6CH3KJRGXKyGdymfPdcHx.lRL1.",
+                            RequirePasswordChange = false,
+                            Role = "Customer"
                         });
                 });
 
@@ -185,7 +190,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             CustomerId = "CUS001",
-                            AccountId = "ACC004",
+                            AccountId = "ACC005",
                             FullName = "Phạm Quốc Bảo",
                             Gender = "Male",
                             IsDeleted = false,
@@ -194,7 +199,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             CustomerId = "CUS002",
-                            AccountId = "ACC005",
+                            AccountId = "ACC006",
                             FullName = "Hồ Thị Lan",
                             Gender = "Female",
                             IsDeleted = false,
@@ -203,7 +208,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             CustomerId = "CUS003",
-                            AccountId = "ACC006",
+                            AccountId = "ACC007",
                             FullName = "Đặng Minh Khoa",
                             Gender = "Male",
                             IsDeleted = false,
@@ -212,11 +217,20 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             CustomerId = "CUS004",
-                            AccountId = "ACC007",
+                            AccountId = "ACC008",
                             FullName = "Nguyễn Thị Thu Hương",
                             Gender = "Female",
                             IsDeleted = false,
                             PhoneNumber = "0964455667"
+                        },
+                        new
+                        {
+                            CustomerId = "CUS005",
+                            AccountId = "ACC009",
+                            FullName = "Võ Nhật Minh",
+                            Gender = "Male",
+                            IsDeleted = false,
+                            PhoneNumber = "0975566778"
                         });
                 });
 
@@ -275,8 +289,8 @@ namespace ParkingManagement.DAL.Migrations
                             EmployeeId = "EMP001",
                             AccountId = "ACC002",
                             EmployeeCode = "EMP001",
-                            FullName = "Trần Thị Mai",
-                            Gender = "Female",
+                            FullName = "Nguyễn Thanh",
+                            Gender = "Male",
                             IsDeleted = false,
                             ManagerId = "MGR001",
                             PhoneNumber = "0912345678",
@@ -293,6 +307,17 @@ namespace ParkingManagement.DAL.Migrations
                             ManagerId = "MGR001",
                             PhoneNumber = "0923456789",
                             Shift = "Chiều"
+                        },
+                        new
+                        {
+                            EmployeeId = "EMP003",
+                            AccountId = "ACC004",
+                            EmployeeCode = "EMP003",
+                            FullName = "Phan Quốc Nam",
+                            Gender = "Male",
+                            IsDeleted = true,
+                            ManagerId = "MGR001",
+                            PhoneNumber = "0987654321"
                         });
                 });
 
@@ -337,6 +362,32 @@ namespace ParkingManagement.DAL.Migrations
                     b.HasKey("InviteToken");
 
                     b.ToTable("EmployeeInvites");
+
+                    b.HasData(
+                        new
+                        {
+                            InviteToken = "INVITE-EMP004-2026",
+                            CreatedAt = new DateTime(2026, 5, 8, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "staff.invited@gmail.com",
+                            EmployeeCode = "EMP004",
+                            ExpiryTime = new DateTime(2030, 12, 31, 23, 59, 59, 0, DateTimeKind.Unspecified),
+                            FullName = "Ngô Minh An",
+                            IsUsed = false,
+                            PhoneNumber = "0977000111",
+                            Shift = "Tối"
+                        },
+                        new
+                        {
+                            InviteToken = "INVITE-USED-EMP005",
+                            CreatedAt = new DateTime(2026, 4, 20, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "staff.usedinvite@gmail.com",
+                            EmployeeCode = "EMP005",
+                            ExpiryTime = new DateTime(2026, 4, 21, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            FullName = "Đỗ Thanh Bình",
+                            IsUsed = true,
+                            PhoneNumber = "0977000222",
+                            Shift = "Sáng"
+                        });
                 });
 
             modelBuilder.Entity("ParkingManagement.DAL.Models.Manager", b =>
@@ -378,8 +429,8 @@ namespace ParkingManagement.DAL.Migrations
                         {
                             ManagerId = "MGR001",
                             AccountId = "ACC001",
-                            FullName = "Nguyễn Thành Tùng",
-                            Gender = "Male",
+                            FullName = "Nguyễn Thị Hường",
+                            Gender = "Female",
                             IsDeleted = false,
                             PhoneNumber = "0901234567"
                         });
@@ -449,7 +500,7 @@ namespace ParkingManagement.DAL.Migrations
                             PackageType = "1 tháng",
                             StartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Hoạt động",
-                            TotalFee = 350000m,
+                            TotalFee = 500000m,
                             VehiclePlate = "43D-234.56",
                             VehicleType = "Ô tô lớn"
                         },
@@ -462,7 +513,7 @@ namespace ParkingManagement.DAL.Migrations
                             PackageType = "3 tháng",
                             StartDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Hoạt động",
-                            TotalFee = 650000m,
+                            TotalFee = 800000m,
                             VehiclePlate = "51G-888.88",
                             VehicleType = "Ô tô nhỏ"
                         },
@@ -477,6 +528,19 @@ namespace ParkingManagement.DAL.Migrations
                             Status = "Hết hạn",
                             TotalFee = 150000m,
                             VehiclePlate = "43C-789.01",
+                            VehicleType = "Xe máy"
+                        },
+                        new
+                        {
+                            MonthlyTicketId = "MTK004",
+                            CreatedAt = new DateTime(2026, 4, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            CustomerId = "CUS005",
+                            EndDate = new DateTime(2026, 4, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PackageType = "1 tháng",
+                            StartDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Status = "Đã hủy",
+                            TotalFee = 150000m,
+                            VehiclePlate = "43E-222.33",
                             VehicleType = "Xe máy"
                         });
                 });
@@ -514,6 +578,27 @@ namespace ParkingManagement.DAL.Migrations
                     b.HasIndex("Email");
 
                     b.ToTable("Otps");
+
+                    b.HasData(
+                        new
+                        {
+                            OtpId = "OTP001",
+                            Code = "123456",
+                            CreatedAt = new DateTime(2026, 5, 8, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "customer.pending@gmail.com",
+                            ExpiresAt = new DateTime(2030, 12, 31, 23, 59, 59, 0, DateTimeKind.Unspecified),
+                            IsVerified = false
+                        },
+                        new
+                        {
+                            OtpId = "OTP002",
+                            Code = "654321",
+                            CreatedAt = new DateTime(2026, 5, 8, 8, 5, 0, 0, DateTimeKind.Unspecified),
+                            Email = "th04092006.customer@gmail.com",
+                            ExpiresAt = new DateTime(2026, 5, 8, 8, 10, 0, 0, DateTimeKind.Unspecified),
+                            IsVerified = true,
+                            VerifiedAt = new DateTime(2026, 5, 8, 8, 6, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("ParkingManagement.DAL.Models.ParkingSlot", b =>
@@ -551,7 +636,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             SlotId = "A01",
-                            LastUpdated = new DateTime(2026, 5, 10, 8, 23, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 8, 23, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu A - Ô 01",
                             Status = "Đang sử dụng",
                             VehicleType = "Xe máy"
@@ -559,7 +644,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             SlotId = "A02",
-                            LastUpdated = new DateTime(2026, 5, 9, 17, 30, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 7, 30, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu A - Ô 02",
                             Status = "Trống",
                             VehicleType = "Xe máy"
@@ -567,7 +652,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             SlotId = "A03",
-                            LastUpdated = new DateTime(2026, 5, 8, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 7, 30, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu A - Ô 03",
                             Status = "Trống",
                             VehicleType = "Xe máy"
@@ -575,7 +660,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             SlotId = "A04",
-                            LastUpdated = new DateTime(2026, 5, 10, 10, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 10, 0, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu A - Ô 04",
                             Status = "Đã đặt",
                             VehicleType = "Xe máy"
@@ -583,15 +668,23 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             SlotId = "A05",
-                            LastUpdated = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 10, 15, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu A - Ô 05",
-                            Status = "Trống",
+                            Status = "Đang sử dụng",
+                            VehicleType = "Xe máy"
+                        },
+                        new
+                        {
+                            SlotId = "A06",
+                            LastUpdated = new DateTime(2026, 5, 7, 16, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = "Khu A - Ô 06",
+                            Status = "Bảo trì",
                             VehicleType = "Xe máy"
                         },
                         new
                         {
                             SlotId = "B01",
-                            LastUpdated = new DateTime(2026, 5, 10, 9, 5, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 9, 5, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu B - Ô 01",
                             Status = "Đang sử dụng",
                             VehicleType = "Ô tô nhỏ"
@@ -599,7 +692,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             SlotId = "B02",
-                            LastUpdated = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 7, 30, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu B - Ô 02",
                             Status = "Trống",
                             VehicleType = "Ô tô nhỏ"
@@ -607,7 +700,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             SlotId = "B03",
-                            LastUpdated = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 7, 30, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu B - Ô 03",
                             Status = "Trống",
                             VehicleType = "Ô tô nhỏ"
@@ -615,7 +708,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             SlotId = "C01",
-                            LastUpdated = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 8, 40, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu C - Ô 01",
                             Status = "Đang sử dụng",
                             VehicleType = "Ô tô lớn"
@@ -623,9 +716,17 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             SlotId = "C02",
-                            LastUpdated = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            LastUpdated = new DateTime(2026, 5, 8, 7, 30, 0, 0, DateTimeKind.Unspecified),
                             Location = "Khu C - Ô 02",
                             Status = "Trống",
+                            VehicleType = "Ô tô lớn"
+                        },
+                        new
+                        {
+                            SlotId = "C03",
+                            LastUpdated = new DateTime(2026, 5, 6, 15, 0, 0, 0, DateTimeKind.Unspecified),
+                            Location = "Khu C - Ô 03",
+                            Status = "Bảo trì",
                             VehicleType = "Ô tô lớn"
                         });
                 });
@@ -674,6 +775,41 @@ namespace ParkingManagement.DAL.Migrations
                     b.HasIndex("SlotId");
 
                     b.ToTable("ParkingSlotAuditLogs");
+
+                    b.HasData(
+                        new
+                        {
+                            LogId = "LOG001",
+                            ChangedAt = new DateTime(2026, 5, 8, 10, 0, 0, 0, DateTimeKind.Unspecified),
+                            EmployeeId = "EMP001",
+                            NewStatus = "Đã đặt",
+                            Note = "Khách đặt chỗ trước",
+                            OldStatus = "Trống",
+                            Reason = "Reservation RES001",
+                            SlotId = "A04"
+                        },
+                        new
+                        {
+                            LogId = "LOG002",
+                            ChangedAt = new DateTime(2026, 5, 7, 16, 0, 0, 0, DateTimeKind.Unspecified),
+                            EmployeeId = "EMP002",
+                            NewStatus = "Bảo trì",
+                            Note = "Khóa ô để sửa cảm biến",
+                            OldStatus = "Trống",
+                            Reason = "Maintenance",
+                            SlotId = "A06"
+                        },
+                        new
+                        {
+                            LogId = "LOG003",
+                            ChangedAt = new DateTime(2026, 5, 8, 9, 5, 0, 0, DateTimeKind.Unspecified),
+                            EmployeeId = "EMP001",
+                            NewStatus = "Đang sử dụng",
+                            Note = "Check-in TKT002",
+                            OldStatus = "Trống",
+                            Reason = "Check-in",
+                            SlotId = "B01"
+                        });
                 });
 
             modelBuilder.Entity("ParkingManagement.DAL.Models.Payment", b =>
@@ -727,41 +863,41 @@ namespace ParkingManagement.DAL.Migrations
                             PaymentId = "PAY001",
                             Amount = 10500m,
                             Method = "Tiền mặt",
-                            PaymentTime = new DateTime(2026, 5, 9, 17, 31, 0, 0, DateTimeKind.Unspecified),
+                            PaymentTime = new DateTime(2026, 5, 7, 17, 31, 0, 0, DateTimeKind.Unspecified),
                             Status = "Thành công",
-                            TicketId = "TKT004"
+                            TicketId = "TKT005"
                         },
                         new
                         {
                             PaymentId = "PAY002",
                             Amount = 13500m,
                             Method = "Chuyển khoản",
-                            PaymentTime = new DateTime(2026, 5, 8, 12, 1, 0, 0, DateTimeKind.Unspecified),
+                            PaymentTime = new DateTime(2026, 5, 6, 12, 1, 0, 0, DateTimeKind.Unspecified),
                             Status = "Thành công",
-                            TicketId = "TKT005"
+                            TicketId = "TKT006"
                         },
                         new
                         {
                             PaymentId = "PAY003",
                             Amount = 24000m,
                             Method = "Tiền mặt",
-                            PaymentTime = new DateTime(2026, 5, 7, 11, 1, 0, 0, DateTimeKind.Unspecified),
+                            PaymentTime = new DateTime(2026, 5, 5, 11, 1, 0, 0, DateTimeKind.Unspecified),
                             Status = "Thành công",
-                            TicketId = "TKT006"
+                            TicketId = "TKT007"
                         },
                         new
                         {
                             PaymentId = "PAY004",
                             Amount = 24000m,
                             Method = "Tiền mặt",
-                            PaymentTime = new DateTime(2026, 5, 9, 12, 31, 0, 0, DateTimeKind.Unspecified),
+                            PaymentTime = new DateTime(2026, 5, 4, 12, 31, 0, 0, DateTimeKind.Unspecified),
                             Status = "Thành công",
-                            TicketId = "TKT007"
+                            TicketId = "TKT008"
                         },
                         new
                         {
                             PaymentId = "PAY005",
-                            Amount = 350000m,
+                            Amount = 500000m,
                             Method = "Ví điện tử",
                             MonthlyTicketId = "MTK001",
                             PaymentTime = new DateTime(2026, 5, 1, 9, 5, 0, 0, DateTimeKind.Unspecified),
@@ -770,7 +906,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             PaymentId = "PAY006",
-                            Amount = 650000m,
+                            Amount = 800000m,
                             Method = "Chuyển khoản",
                             MonthlyTicketId = "MTK002",
                             PaymentTime = new DateTime(2026, 4, 1, 10, 5, 0, 0, DateTimeKind.Unspecified),
@@ -784,6 +920,15 @@ namespace ParkingManagement.DAL.Migrations
                             MonthlyTicketId = "MTK003",
                             PaymentTime = new DateTime(2026, 3, 1, 8, 5, 0, 0, DateTimeKind.Unspecified),
                             Status = "Thành công"
+                        },
+                        new
+                        {
+                            PaymentId = "PAY008",
+                            Amount = 150000m,
+                            Method = "Tiền mặt",
+                            MonthlyTicketId = "MTK004",
+                            PaymentTime = new DateTime(2026, 4, 1, 8, 5, 0, 0, DateTimeKind.Unspecified),
+                            Status = "Thất bại"
                         });
                 });
 
@@ -815,6 +960,143 @@ namespace ParkingManagement.DAL.Migrations
                     b.HasKey("PricingId");
 
                     b.ToTable("PricingConfigurations");
+
+                    b.HasData(
+                        new
+                        {
+                            PricingId = "PRICE-XM-HOUR",
+                            Amount = 3000m,
+                            RateType = "HourlyRate",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Xe máy"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-XM-DAY",
+                            Amount = 30000m,
+                            RateType = "MaxDailyFee",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Xe máy"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-XM-M1",
+                            Amount = 150000m,
+                            RateType = "Monthly1M",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Xe máy"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-XM-M3",
+                            Amount = 400000m,
+                            RateType = "Monthly3M",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Xe máy"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-XM-M6",
+                            Amount = 750000m,
+                            RateType = "Monthly6M",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Xe máy"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTON-HOUR",
+                            Amount = 5000m,
+                            RateType = "HourlyRate",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô nhỏ"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTON-DAY",
+                            Amount = 50000m,
+                            RateType = "MaxDailyFee",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô nhỏ"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTON-M1",
+                            Amount = 300000m,
+                            RateType = "Monthly1M",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô nhỏ"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTON-M3",
+                            Amount = 800000m,
+                            RateType = "Monthly3M",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô nhỏ"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTON-M6",
+                            Amount = 1500000m,
+                            RateType = "Monthly6M",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô nhỏ"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTOL-HOUR",
+                            Amount = 8000m,
+                            RateType = "HourlyRate",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô lớn"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTOL-DAY",
+                            Amount = 80000m,
+                            RateType = "MaxDailyFee",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô lớn"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTOL-M1",
+                            Amount = 500000m,
+                            RateType = "Monthly1M",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô lớn"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTOL-M3",
+                            Amount = 1300000m,
+                            RateType = "Monthly3M",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô lớn"
+                        },
+                        new
+                        {
+                            PricingId = "PRICE-OTOL-M6",
+                            Amount = 2500000m,
+                            RateType = "Monthly6M",
+                            UpdatedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            UpdatedBy = "MGR001",
+                            VehicleType = "Ô tô lớn"
+                        });
                 });
 
             modelBuilder.Entity("ParkingManagement.DAL.Models.Reservation", b =>
@@ -864,9 +1146,9 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             ReservationId = "RES001",
-                            CreatedAt = new DateTime(2026, 5, 10, 10, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 5, 8, 10, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerId = "CUS003",
-                            ExpectedTime = new DateTime(2026, 5, 10, 14, 0, 0, 0, DateTimeKind.Unspecified),
+                            ExpectedTime = new DateTime(2026, 5, 8, 14, 0, 0, 0, DateTimeKind.Unspecified),
                             SlotId = "A04",
                             Status = "Chờ",
                             VehiclePlate = "43C-789.01"
@@ -874,12 +1156,32 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             ReservationId = "RES002",
-                            CreatedAt = new DateTime(2026, 5, 7, 20, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2026, 5, 6, 20, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerId = "CUS002",
-                            ExpectedTime = new DateTime(2026, 5, 8, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            ExpectedTime = new DateTime(2026, 5, 7, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             SlotId = "B03",
                             Status = "Đã nhận",
                             VehiclePlate = "43B-456.78"
+                        },
+                        new
+                        {
+                            ReservationId = "RES003",
+                            CreatedAt = new DateTime(2026, 5, 6, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            CustomerId = "CUS005",
+                            ExpectedTime = new DateTime(2026, 5, 6, 18, 0, 0, 0, DateTimeKind.Unspecified),
+                            SlotId = "A03",
+                            Status = "Hủy",
+                            VehiclePlate = "43E-222.33"
+                        },
+                        new
+                        {
+                            ReservationId = "RES004",
+                            CreatedAt = new DateTime(2026, 4, 30, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            CustomerId = "CUS001",
+                            ExpectedTime = new DateTime(2026, 5, 1, 10, 0, 0, 0, DateTimeKind.Unspecified),
+                            SlotId = "C02",
+                            Status = "Hết hạn",
+                            VehiclePlate = "51G-888.88"
                         });
                 });
 
@@ -938,7 +1240,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             TicketId = "TKT001",
-                            CheckInTime = new DateTime(2026, 5, 10, 8, 23, 0, 0, DateTimeKind.Unspecified),
+                            CheckInTime = new DateTime(2026, 5, 8, 8, 23, 0, 0, DateTimeKind.Unspecified),
                             CustomerId = "CUS001",
                             Fee = 0m,
                             SlotId = "A01",
@@ -949,7 +1251,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             TicketId = "TKT002",
-                            CheckInTime = new DateTime(2026, 5, 10, 9, 5, 0, 0, DateTimeKind.Unspecified),
+                            CheckInTime = new DateTime(2026, 5, 8, 9, 5, 0, 0, DateTimeKind.Unspecified),
                             CustomerId = "CUS002",
                             Fee = 0m,
                             SlotId = "B01",
@@ -960,7 +1262,7 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             TicketId = "TKT003",
-                            CheckInTime = new DateTime(2026, 5, 10, 10, 15, 0, 0, DateTimeKind.Unspecified),
+                            CheckInTime = new DateTime(2026, 5, 8, 10, 15, 0, 0, DateTimeKind.Unspecified),
                             Fee = 0m,
                             SlotId = "A05",
                             Status = "Đang trong bãi",
@@ -970,8 +1272,19 @@ namespace ParkingManagement.DAL.Migrations
                         new
                         {
                             TicketId = "TKT004",
-                            CheckInTime = new DateTime(2026, 5, 9, 14, 0, 0, 0, DateTimeKind.Unspecified),
-                            CheckOutTime = new DateTime(2026, 5, 9, 17, 30, 0, 0, DateTimeKind.Unspecified),
+                            CheckInTime = new DateTime(2026, 5, 8, 8, 40, 0, 0, DateTimeKind.Unspecified),
+                            CustomerId = "CUS004",
+                            Fee = 0m,
+                            SlotId = "C01",
+                            Status = "Đang trong bãi",
+                            VehiclePlate = "43D-234.56",
+                            VehicleType = "Ô tô lớn"
+                        },
+                        new
+                        {
+                            TicketId = "TKT005",
+                            CheckInTime = new DateTime(2026, 5, 7, 14, 0, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutTime = new DateTime(2026, 5, 7, 17, 30, 0, 0, DateTimeKind.Unspecified),
                             CustomerId = "CUS003",
                             Fee = 10500m,
                             SlotId = "A02",
@@ -981,9 +1294,9 @@ namespace ParkingManagement.DAL.Migrations
                         },
                         new
                         {
-                            TicketId = "TKT005",
-                            CheckInTime = new DateTime(2026, 5, 8, 7, 30, 0, 0, DateTimeKind.Unspecified),
-                            CheckOutTime = new DateTime(2026, 5, 8, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            TicketId = "TKT006",
+                            CheckInTime = new DateTime(2026, 5, 6, 7, 30, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutTime = new DateTime(2026, 5, 6, 12, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerId = "CUS001",
                             Fee = 13500m,
                             SlotId = "A03",
@@ -993,9 +1306,9 @@ namespace ParkingManagement.DAL.Migrations
                         },
                         new
                         {
-                            TicketId = "TKT006",
-                            CheckInTime = new DateTime(2026, 5, 7, 8, 0, 0, 0, DateTimeKind.Unspecified),
-                            CheckOutTime = new DateTime(2026, 5, 7, 11, 0, 0, 0, DateTimeKind.Unspecified),
+                            TicketId = "TKT007",
+                            CheckInTime = new DateTime(2026, 5, 5, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutTime = new DateTime(2026, 5, 5, 11, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerId = "CUS002",
                             Fee = 24000m,
                             SlotId = "B02",
@@ -1005,9 +1318,9 @@ namespace ParkingManagement.DAL.Migrations
                         },
                         new
                         {
-                            TicketId = "TKT007",
-                            CheckInTime = new DateTime(2026, 5, 9, 9, 0, 0, 0, DateTimeKind.Unspecified),
-                            CheckOutTime = new DateTime(2026, 5, 9, 12, 30, 0, 0, DateTimeKind.Unspecified),
+                            TicketId = "TKT008",
+                            CheckInTime = new DateTime(2026, 5, 4, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutTime = new DateTime(2026, 5, 4, 12, 30, 0, 0, DateTimeKind.Unspecified),
                             Fee = 24000m,
                             SlotId = "B03",
                             Status = "Đã ra",
@@ -1067,8 +1380,24 @@ namespace ParkingManagement.DAL.Migrations
                         },
                         new
                         {
+                            VehiclePlate = "43E-222.33",
+                            CustomerId = "CUS005",
+                            VehicleType = "Xe máy"
+                        },
+                        new
+                        {
                             VehiclePlate = "51G-888.88",
                             CustomerId = "CUS001",
+                            VehicleType = "Ô tô nhỏ"
+                        },
+                        new
+                        {
+                            VehiclePlate = "92C-111.22",
+                            VehicleType = "Xe máy"
+                        },
+                        new
+                        {
+                            VehiclePlate = "74A-567.89",
                             VehicleType = "Ô tô nhỏ"
                         });
                 });
@@ -1095,7 +1424,7 @@ namespace ParkingManagement.DAL.Migrations
                     b.HasOne("ParkingManagement.DAL.Models.Manager", "Manager")
                         .WithMany("Employees")
                         .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Account");
 

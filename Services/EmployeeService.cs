@@ -16,7 +16,7 @@ namespace ParkingManagement.BLL.Services.Implementations
         private readonly ITicketRepository _ticketRepo;
 
         public EmployeeService(
-            IEmployeeRepository repo, 
+            IEmployeeRepository repo,
             IAccountRepository accountRepo,
             IEmployeeInviteRepository inviteRepo,
             IParkingSlotAuditLogRepository auditLogRepo,
@@ -60,10 +60,9 @@ namespace ParkingManagement.BLL.Services.Implementations
             var account = new Account
             {
                 AccountId = accountId,
-                Username = email.Split('@')[0],
+                Email = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12),
                 Role = role,
-                Email = email,
                 CreatedAt = DateTime.Now,
                 IsActive = true
             };
@@ -152,7 +151,7 @@ namespace ParkingManagement.BLL.Services.Implementations
                     var keyword = filter.SearchKeyword.Trim().ToLower();
                     filtered = filtered.Where(e =>
                         e.FullName.ToLower().Contains(keyword) ||
-                        e.Account?.Username.ToLower().Contains(keyword) == true);
+                        e.Account?.Email.ToLower().Contains(keyword) == true);
                 }
 
                 var sorted = filtered.OrderByDescending(e => e.EmployeeCode).ToList();
@@ -168,7 +167,7 @@ namespace ParkingManagement.BLL.Services.Implementations
                 {
                     EmployeeId = e.EmployeeId,
                     FullName = e.FullName,
-                    Email = e.Account?.Username ?? "",
+                    Email = e.Account?.Email ?? "",
                     PhoneNumber = e.PhoneNumber ?? "",
                     Shift = e.Shift,
                     Status = e.IsDeleted ? "Vô hiệu hóa" : "Hoạt động",
@@ -232,7 +231,7 @@ namespace ParkingManagement.BLL.Services.Implementations
                 {
                     EmployeeId = employee.EmployeeId,
                     FullName = employee.FullName,
-                    Email = employee.Account?.Username ?? "",
+                    Email = employee.Account?.Email ?? "",
                     PhoneNumber = employee.PhoneNumber ?? "",
                     Shift = employee.Shift,
                     Status = employee.IsDeleted ? "Vô hiệu hóa" : "Hoạt động",
@@ -259,7 +258,7 @@ namespace ParkingManagement.BLL.Services.Implementations
                     return new CreateEmployeeInviteResultDto { Success = false, Message = "Email không được để trống" };
 
                 var email = request.Email.Trim().ToLower();
-                var existingAccount = await _accountRepo.GetByUsernameAsync(email);
+                var existingAccount = await _accountRepo.GetByEmailAsync(email);
                 if (existingAccount != null)
                     return new CreateEmployeeInviteResultDto { Success = false, Message = "Email này đã được đăng ký" };
 
@@ -270,7 +269,7 @@ namespace ParkingManagement.BLL.Services.Implementations
                 var account = new Account
                 {
                     AccountId = accountId,
-                    Username = email,
+                    Email = email,
                     PasswordHash = "",
                     Role = "Employee",
                     IsActive = false,
@@ -376,7 +375,8 @@ namespace ParkingManagement.BLL.Services.Implementations
             if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.FullName) || string.IsNullOrWhiteSpace(dto.PhoneNumber))
                 return ServiceResult<EmployeeInviteDto>.Fail("Vui lòng nhập đầy đủ thông tin.");
 
-            var existingInvite = await _inviteRepo.GetByEmailAsync(dto.Email);
+            var email = dto.Email.Trim().ToLower();
+            var existingInvite = await _inviteRepo.GetByEmailAsync(email);
             if (existingInvite != null && !existingInvite.IsUsed)
                 return ServiceResult<EmployeeInviteDto>.Fail("Email này đã có lời mời chưa sử dụng.");
 
@@ -387,7 +387,7 @@ namespace ParkingManagement.BLL.Services.Implementations
             {
                 InviteToken = inviteToken,
                 EmployeeCode = employeeCode,
-                Email = dto.Email.Trim().ToLower(),
+                Email = email,
                 FullName = dto.FullName.Trim(),
                 PhoneNumber = dto.PhoneNumber.Trim(),
                 Shift = dto.Shift?.Trim(),
@@ -401,7 +401,7 @@ namespace ParkingManagement.BLL.Services.Implementations
             var result = new EmployeeInviteDto
             {
                 EmployeeCode = employeeCode,
-                Email = dto.Email,
+                Email = email,
                 FullName = dto.FullName,
                 InviteToken = inviteToken,
                 InviteExpiry = invite.ExpiryTime

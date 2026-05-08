@@ -16,9 +16,6 @@ namespace ParkingManagement.DAL.Implementations
         public Task<Account?> GetByEmailAsync(string email) =>
             _db.Accounts.FirstOrDefaultAsync(a => a.Email == email);
 
-        public Task<Account?> GetByUsernameAsync(string username) =>
-            _db.Accounts.FirstOrDefaultAsync(a => a.Username == username);
-
         public async Task AddAsync(Account account)
         {
             // 1. Tạo ID một lần duy nhất, không dùng vòng lặp while để tránh treo
@@ -50,8 +47,5 @@ namespace ParkingManagement.DAL.Implementations
 
         public Task<bool> ExistsEmailAsync(string email) =>
             _db.Accounts.AnyAsync(a => a.Email == email);
-
-        public Task<bool> ExistsUsernameAsync(string username) =>
-            _db.Accounts.AnyAsync(a => a.Username == username);
     }
 }

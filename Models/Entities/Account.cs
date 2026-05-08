@@ -11,10 +11,6 @@ namespace ParkingManagement.DAL.Models
         public string AccountId { get; set; } = null!;
 
         [Required]
-        [MaxLength(50)]
-        public string Username { get; set; } = null!;
-
-        [Required]
         [MaxLength(256)]
         public string PasswordHash { get; set; } = null!;
 
@@ -22,8 +18,9 @@ namespace ParkingManagement.DAL.Models
         [MaxLength(20)]
         public string Role { get; set; } = null!; // Customer / Employee / Manager
 
+        [Required]
         [MaxLength(100)]
-        public string? Email { get; set; }
+        public string Email { get; set; } = null!;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

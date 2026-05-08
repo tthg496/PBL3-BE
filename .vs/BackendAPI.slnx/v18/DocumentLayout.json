@@ -91,19 +91,6 @@
               "IsPinned": true
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "AppDbContext.cs",
-              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\AppDbContext.cs",
-              "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
-              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\AppDbContext.cs",
-              "RelativeToolTip": "Data\\AppDbContext.cs",
-              "ViewState": "AgIAACkAAAAAAAAAAAAgwG4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-07T15:25:00.489Z",
-              "EditorCaption": ""
-            },
-            {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
             },
@@ -117,6 +104,18 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
+              "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "Data\\AppDbContext.cs",
+              "ViewState": "AgIAACkAAAAAAAAAAAAgwG4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T15:25:00.489Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
               "Title": "SeedData.cs",
               "DocumentMoniker": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Data\\SeedData.cs",
@@ -125,8 +124,7 @@
               "RelativeToolTip": "Data\\SeedData.cs",
               "ViewState": "AgIAAE0AAAAAAAAAAAAgwG4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-07T12:00:46.174Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-07T12:00:46.174Z"
             },
             {
               "$type": "Document",
@@ -172,7 +170,7 @@
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "D:\\1.university\\ky 4\\.Net\\project\\BackendAPI\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAABsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAACkAAAAAAAAAAAAqwDIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-06T03:31:49.884Z",
               "EditorCaption": ""

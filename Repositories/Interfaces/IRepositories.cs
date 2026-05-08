@@ -6,11 +6,9 @@ namespace ParkingManagement.DAL.Interfaces
     {
         Task<Account?> GetByIdAsync(string id);
         Task<Account?> GetByEmailAsync(string email);
-        Task<Account?> GetByUsernameAsync(string username);
         Task AddAsync(Account account);
         Task UpdateAsync(Account account);
         Task<bool> ExistsEmailAsync(string email);
-        Task<bool> ExistsUsernameAsync(string username);
     }
 
     public interface ICustomerRepository

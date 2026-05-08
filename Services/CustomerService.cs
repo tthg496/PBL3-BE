@@ -149,7 +149,7 @@ namespace ParkingManagement.BLL.Services.Implementations
                         string.IsNullOrEmpty(keyword) ||
                         c.FullName.ToLower().Contains(keyword) ||
                         (c.PhoneNumber != null && c.PhoneNumber.ToLower().Contains(keyword)) ||
-                        (c.Account?.Username != null && c.Account.Username.ToLower().Contains(keyword)) ||
+                        (c.Account?.Email != null && c.Account.Email.ToLower().Contains(keyword)) ||
                         allTickets.Any(t => t.CustomerId == c.CustomerId && t.VehiclePlate.ToLower().Contains(keyword))
                     )
                     .ToList();
@@ -177,7 +177,7 @@ namespace ParkingManagement.BLL.Services.Implementations
                         CustomerId = c.CustomerId,
                         FullName = c.FullName,
                         PhoneNumber = c.PhoneNumber ?? "",
-                        Email = c.Account?.Username ?? "",
+                        Email = c.Account?.Email ?? "",
                         HasActiveMonthlyTicket = hasActiveMonthly,
                         TotalTickets = customerTickets.Count,
                         LastVisit = lastVisit
@@ -241,7 +241,7 @@ namespace ParkingManagement.BLL.Services.Implementations
                     CustomerId = customer.CustomerId,
                     FullName = customer.FullName,
                     PhoneNumber = customer.PhoneNumber ?? "",
-                    Email = customer.Account?.Username ?? "",
+                    Email = customer.Account?.Email ?? "",
                     CreatedAt = customer.Account?.CreatedAt ?? DateTime.Now,
                     HasActiveMonthlyTicket = activeMonthly != null,
                     ActiveMonthlyTicketId = activeMonthly?.MonthlyTicketId,

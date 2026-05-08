@@ -82,7 +82,6 @@ namespace ParkingManagement.Web.Controllers.Admin
                 var account = new Account
                 {
                     AccountId = newAccountId,
-                    Username = model.Email.Split('@')[0] + new Random().Next(1000, 9999),
                     Email = model.Email,
                     PasswordHash = HashPassword(model.Password),
                     Role = "Employee",
